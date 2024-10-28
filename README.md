@@ -1,5 +1,6 @@
 <div align="center">  
   <h1>📦 LostIT 📦</h1>  
+  <h2>FRONTEND</h2>
   <p>An Inventory Management System For Lost Items</p>
 </div>
 <hr>
