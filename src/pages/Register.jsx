@@ -32,7 +32,7 @@ function Register() {
     }
 
     try {
-      // Add your API call here
+      // PUT APi HERE
       // const response = await axios.post('/api/register', formData);
       navigate('/login');
     } catch (err) {

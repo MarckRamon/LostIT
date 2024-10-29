@@ -21,7 +21,7 @@ import {
   InputLabel,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
-import axiosInstance from '../axiosInstance'; // Import your custom axios instance
+import axiosInstance from '../axiosInstance';
 
 const categories = [
   { id: 1, name: 'Electronics' },
