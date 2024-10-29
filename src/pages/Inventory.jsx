@@ -23,6 +23,7 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import axiosInstance from '../axiosInstance';
 
+// Categories data
 const categories = [
   { id: 1, name: 'Electronics' },
   { id: 2, name: 'Furniture' },
@@ -32,6 +33,7 @@ const categories = [
   { id: 6, name: 'Others' },
 ];
 
+// Locations data
 const locations = [
   { id: 1, name: 'NGE' },
   { id: 2, name: 'GLE' },
@@ -45,6 +47,7 @@ const locations = [
   { id: 10, name: 'ACCOUNTING' },
 ];
 
+// Initial form state
 const initialFormState = {
   itemName: '',
   category: '',
@@ -54,6 +57,7 @@ const initialFormState = {
 };
 
 function Inventory() {
+  // State management
   const [items, setItems] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,29 +65,48 @@ function Inventory() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const fetchItems = async () => {
-    try {
-      const response = await axiosInstance.get('/api/items/getAllItems');
-      setItems(response.data);
-    } catch (error) {
-      console.error("Error fetching items:", error);
-      setError("Failed to fetch items");
-    }
-  };
-
+  // Fetch items on component mount
   useEffect(() => {
     fetchItems();
   }, []);
 
+  // Clear success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  // Fetch items from API
+  const fetchItems = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get('/api/items/getAllItems');
+      console.log('Fetched items:', response.data);
+      setItems(response.data);
+      setError('');
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      setError("Failed to fetch items. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle dialog open
   const handleOpenDialog = (item = null) => {
     setError('');
     if (item) {
       setFormData({
-        itemName: item.itemName,
-        category: item.category?.categoryId || '',
+        itemName: item.itemName || '',
+        category: item.category?.categoryId || item.categoryId || '',
         description: item.description || '',
-        location: item.location?.locationId || '',
+        location: item.location?.locationId || item.locationId || '',
         status: item.status || 'Active',
       });
       setEditingId(item.id);
@@ -94,6 +117,7 @@ function Inventory() {
     setOpenDialog(true);
   };
 
+  // Handle dialog close
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setFormData(initialFormState);
@@ -101,7 +125,9 @@ function Inventory() {
     setError('');
   };
 
+  // Handle form submission
   const handleSubmit = async () => {
+    // Validation
     if (!formData.itemName || !formData.category || !formData.location) {
       setError("Please fill in all required fields.");
       return;
@@ -112,8 +138,8 @@ function Inventory() {
 
     try {
       const requestData = {
-        itemName: formData.itemName,
-        description: formData.description || '',
+        itemName: formData.itemName.trim(),
+        description: formData.description.trim(),
         status: formData.status,
         category: {
           categoryId: parseInt(formData.category)
@@ -125,48 +151,88 @@ function Inventory() {
 
       if (editingId) {
         await axiosInstance.put(`/api/items/updateItemDetails?id=${editingId}`, requestData);
+        setSuccessMessage('Item updated successfully!');
       } else {
-        await axiosInstance.post('/api/items/createItem', requestData);
+        await axiosInstance.post('/api/items/addItem', requestData);
+        setSuccessMessage('Item added successfully!');
       }
 
       await fetchItems();
       handleCloseDialog();
     } catch (error) {
-      console.error("Error saving item:", error.response || error);
+      console.error("Error saving item:", error);
       setError(error.response?.data?.message || "Error saving item. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle item deletion
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
+        setLoading(true);
         await axiosInstance.delete(`/api/items/deleteItem/${id}`);
         await fetchItems();
+        setSuccessMessage('Item deleted successfully!');
       } catch (error) {
         console.error("Error deleting item:", error);
         setError(error.response?.data?.message || "Error deleting item. Please try again.");
+      } finally {
+        setLoading(false);
       }
     }
   };
 
+  // Filter items based on search term
   const filteredItems = items.filter(item =>
-    item.itemName?.toLowerCase().includes(searchTerm.toLowerCase())
+    item.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Get category name from ID
   const getCategoryName = (categoryId) => {
+    if (!categoryId) return 'N/A';
     const category = categories.find(c => c.id === parseInt(categoryId));
-    return category ? category.name : '';
+    return category ? category.name : 'N/A';
   };
 
+  // Get location name from ID
   const getLocationName = (locationId) => {
+    if (!locationId) return 'N/A';
     const location = locations.find(l => l.id === parseInt(locationId));
-    return location ? location.name : '';
+    return location ? location.name : 'N/A';
   };
 
   return (
-    <Box>
+    <Box sx={{ p: 3 }}>
+      {/* Success message */}
+      {successMessage && (
+        <Box sx={{ 
+          mb: 2, 
+          p: 2, 
+          bgcolor: 'success.light', 
+          color: 'success.contrastText',
+          borderRadius: 1
+        }}>
+          {successMessage}
+        </Box>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <Box sx={{ 
+          mb: 2, 
+          p: 2, 
+          bgcolor: 'error.light', 
+          color: 'error.contrastText',
+          borderRadius: 1
+        }}>
+          {error}
+        </Box>
+      )}
+
+      {/* Search and Add button */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         <TextField
           placeholder="Search items..."
@@ -180,11 +246,13 @@ function Inventory() {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenDialog()}
+          disabled={loading}
         >
           Add New Item
         </Button>
       </Box>
 
+      {/* Items Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -199,29 +267,53 @@ function Inventory() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredItems.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>{item.id}</TableCell>
-                <TableCell>{item.itemName}</TableCell>
-                <TableCell>{getCategoryName(item.category?.categoryId)}</TableCell>
-                <TableCell>{getLocationName(item.location?.locationId)}</TableCell>
-                <TableCell>{item.description}</TableCell>
-                <TableCell>{item.status}</TableCell>
-                <TableCell>
-                  <IconButton onClick={() => handleOpenDialog(item)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton onClick={() => handleDelete(item.id)}>
-                    <DeleteIcon />
-                  </IconButton>
+            {filteredItems.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  {loading ? 'Loading...' : 'No items found'}
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              filteredItems.map((item) => (
+                <TableRow key={item.id || crypto.randomUUID()}>
+                  <TableCell>{item.id || 'N/A'}</TableCell>
+                  <TableCell>{item.itemName || 'N/A'}</TableCell>
+                  <TableCell>
+                    {getCategoryName(item.category?.categoryId || item.categoryId)}
+                  </TableCell>
+                  <TableCell>
+                    {getLocationName(item.location?.locationId || item.locationId)}
+                  </TableCell>
+                  <TableCell>{item.description || 'N/A'}</TableCell>
+                  <TableCell>{item.status || 'N/A'}</TableCell>
+                  <TableCell>
+                    <IconButton 
+                      onClick={() => handleOpenDialog(item)}
+                      disabled={loading}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton 
+                      onClick={() => handleDelete(item.id)}
+                      disabled={loading}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+      {/* Add/Edit Dialog */}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
+        fullWidth
+      >
         <DialogTitle>
           {editingId ? 'Edit Item' : 'Add New Item'}
         </DialogTitle>
@@ -239,6 +331,7 @@ function Inventory() {
               value={formData.itemName}
               onChange={(e) => setFormData({ ...formData, itemName: e.target.value })}
               error={!formData.itemName}
+              disabled={loading}
             />
             <FormControl fullWidth required error={!formData.category}>
               <InputLabel>Category</InputLabel>
@@ -246,6 +339,7 @@ function Inventory() {
                 value={formData.category}
                 label="Category"
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                disabled={loading}
               >
                 {categories.map((category) => (
                   <MenuItem key={category.id} value={category.id}>
@@ -260,6 +354,7 @@ function Inventory() {
                 value={formData.location}
                 label="Location"
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                disabled={loading}
               >
                 {locations.map((loc) => (
                   <MenuItem key={loc.id} value={loc.id}>
@@ -275,6 +370,7 @@ function Inventory() {
               rows={3}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              disabled={loading}
             />
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
@@ -282,6 +378,7 @@ function Inventory() {
                 value={formData.status}
                 label="Status"
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                disabled={loading}
               >
                 <MenuItem value="Active">Active</MenuItem>
                 <MenuItem value="Inactive">Inactive</MenuItem>
@@ -290,7 +387,9 @@ function Inventory() {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} disabled={loading}>Cancel</Button>
+          <Button onClick={handleCloseDialog} disabled={loading}>
+            Cancel
+          </Button>
           <Button 
             onClick={handleSubmit} 
             disabled={loading}
@@ -304,4 +403,4 @@ function Inventory() {
   );
 }
 
-export default Inventory;
+export default Inventory; 
