@@ -5,7 +5,7 @@
 <hr>
 <div align="center">
  <h1>🔗 Links 🔗</h2>
-  <a href="https://cebuinstituteoftechnology-my.sharepoint.com/:x:/g/personal/marckramon_paraiso_cit_edu/ESvHrUMQAIdOkJQLlvvrR14BBPw7taN_yPC4nf0f02SzAA?e=O2NJAX">
+  <a href="https://github.com/MarckRamon/LostIT-BackEnd">
     <img src="https://img.shields.io/badge/LostIT_BackEnd_Repo-Link-blue?style=for-the-badge&logoColor=white" alt="LostIT - BackEnd Repo">
   </a>
 </div>
