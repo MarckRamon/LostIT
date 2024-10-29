@@ -276,13 +276,13 @@ function Inventory() {
             ) : (
               filteredItems.map((item) => (
                 <TableRow key={item.id || crypto.randomUUID()}>
-                  <TableCell>{item.id || 'N/A'}</TableCell>
+                  <TableCell>{item.id !== undefined ? item.id : 'N/A'}</TableCell>
                   <TableCell>{item.itemName || 'N/A'}</TableCell>
                   <TableCell>
-                    {getCategoryName(item.category?.categoryId || item.categoryId)}
+                    {getCategoryName(item.categoryId || item.category?.categoryId)}
                   </TableCell>
                   <TableCell>
-                    {getLocationName(item.location?.locationId || item.locationId)}
+                    {getLocationName(item.locationId || item.location?.locationId)}
                   </TableCell>
                   <TableCell>{item.description || 'N/A'}</TableCell>
                   <TableCell>{item.status || 'N/A'}</TableCell>
@@ -305,7 +305,7 @@ function Inventory() {
             )}
           </TableBody>
         </Table>
-      </TableContainer>
+      </TableContainer >
 
       {/* Add/Edit Dialog */}
       <Dialog 
@@ -403,4 +403,4 @@ function Inventory() {
   );
 }
 
-export default Inventory; 
+export default Inventory;
