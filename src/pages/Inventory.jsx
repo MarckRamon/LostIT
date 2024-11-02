@@ -23,7 +23,6 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import axiosInstance from '../axiosInstance';
 
-// Categories data
 const categories = [
   { id: 1, name: 'Electronics' },
   { id: 2, name: 'Furniture' },
@@ -33,7 +32,6 @@ const categories = [
   { id: 6, name: 'Others' },
 ];
 
-// Locations data
 const locations = [
   { id: 1, name: 'NGE' },
   { id: 2, name: 'GLE' },
@@ -47,7 +45,6 @@ const locations = [
   { id: 10, name: 'ACCOUNTING' },
 ];
 
-// Initial form state
 const initialFormState = {
   itemName: '',
   category: '',
@@ -57,7 +54,6 @@ const initialFormState = {
 };
 
 function Inventory() {
-  // State management
   const [items, setItems] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,12 +63,10 @@ function Inventory() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Fetch items on component mount
   useEffect(() => {
     fetchItems();
   }, []);
 
-  // Clear success message after 3 seconds
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => {
@@ -82,7 +76,6 @@ function Inventory() {
     }
   }, [successMessage]);
 
-  // Fetch items from API
   const fetchItems = async () => {
     try {
       setLoading(true);
@@ -98,7 +91,6 @@ function Inventory() {
     }
   };
 
-  // Handle dialog open
   const handleOpenDialog = (item = null) => {
     setError('');
     if (item) {
@@ -117,7 +109,6 @@ function Inventory() {
     setOpenDialog(true);
   };
 
-  // Handle dialog close
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setFormData(initialFormState);
@@ -125,9 +116,7 @@ function Inventory() {
     setError('');
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
-    // Validation
     if (!formData.itemName || !formData.category || !formData.location) {
       setError("Please fill in all required fields.");
       return;
@@ -167,7 +156,6 @@ function Inventory() {
     }
   };
 
-  // Handle item deletion
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
@@ -184,20 +172,17 @@ function Inventory() {
     }
   };
 
-  // Filter items based on search term
   const filteredItems = items.filter(item =>
     item.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Get category name from ID
   const getCategoryName = (categoryId) => {
     if (!categoryId) return 'N/A';
     const category = categories.find(c => c.id === parseInt(categoryId));
     return category ? category.name : 'N/A';
   };
 
-  // Get location name from ID
   const getLocationName = (locationId) => {
     if (!locationId) return 'N/A';
     const location = locations.find(l => l.id === parseInt(locationId));
@@ -206,7 +191,6 @@ function Inventory() {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Success message */}
       {successMessage && (
         <Box sx={{ 
           mb: 2, 
@@ -219,7 +203,6 @@ function Inventory() {
         </Box>
       )}
 
-      {/* Error message */}
       {error && (
         <Box sx={{ 
           mb: 2, 
@@ -232,7 +215,6 @@ function Inventory() {
         </Box>
       )}
 
-      {/* Search and Add button */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         <TextField
           placeholder="Search items..."
@@ -252,7 +234,6 @@ function Inventory() {
         </Button>
       </Box>
 
-      {/* Items Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -307,7 +288,6 @@ function Inventory() {
         </Table>
       </TableContainer >
 
-      {/* Add/Edit Dialog */}
       <Dialog 
         open={openDialog} 
         onClose={handleCloseDialog} 
