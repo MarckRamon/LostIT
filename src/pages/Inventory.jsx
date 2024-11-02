@@ -154,10 +154,7 @@ function Inventory() {
         setSuccessMessage('Item updated successfully!');
       } else {
         await axiosInstance.post('/api/items/addItem', requestData);
-<<<<<<< HEAD
-=======
         setSuccessMessage('Item added successfully!');
->>>>>>> 23f35053dbfc4071669555b0693c417e7cdf165e
       }
 
       await fetchItems();
