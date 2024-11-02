@@ -57,6 +57,7 @@ const initialFormState = {
 };
 
 function Inventory() {
+  // State management
   const [items, setItems] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -168,16 +169,10 @@ function Inventory() {
 
   // Handle item deletion
   const handleDelete = async (id) => {
-    // Add validation to ensure id exists and is a number
-    if (!id || isNaN(id)) {
-      setError("Invalid item ID");
-      return;
-    }
-
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
         setLoading(true);
-        await axiosInstance.delete(`/api/items/deleteItem/${parseInt(id)}`);
+        await axiosInstance.delete(`/api/items/deleteItem/${id}`);
         await fetchItems();
         setSuccessMessage('Item deleted successfully!');
       } catch (error) {
@@ -299,8 +294,8 @@ function Inventory() {
                       <EditIcon />
                     </IconButton>
                     <IconButton 
-                      onClick={() => item.id ? handleDelete(item.id) : setError("Invalid item ID")}
-                      disabled={loading || !item.id}
+                      onClick={() => handleDelete(item.id)}
+                      disabled={loading}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -310,7 +305,7 @@ function Inventory() {
             )}
           </TableBody>
         </Table>
-      </TableContainer>
+      </TableContainer >
 
       {/* Add/Edit Dialog */}
       <Dialog 
