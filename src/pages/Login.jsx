@@ -24,11 +24,16 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     try {
       // PUT API HERE
       // const response = await axios.post('/api/login', formData);
       login({ username: formData.username });
+
+      // Play audio on successful login
+      const audio = new Audio('/you.mp3'); // Update the path to your audio file
+      audio.play();
+
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
