@@ -126,7 +126,7 @@ function Inventory() {
       if (editingId) {
         await axiosInstance.put(`/api/items/updateItemDetails?id=${editingId}`, requestData);
       } else {
-        await axiosInstance.post('/api/items/createItem', requestData);
+        await axiosInstance.post('/api/items/addItem', requestData);
       }
 
       await fetchItems();
