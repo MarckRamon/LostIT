@@ -8,6 +8,9 @@
   <a href="https://github.com/MarckRamon/LostIT-BackEnd">
     <img src="https://img.shields.io/badge/LostIT_BackEnd_Repo-Link-blue?style=for-the-badge&logoColor=white" alt="LostIT - BackEnd Repo">
   </a>
+  <a href="https://trello.com/b/ZJegRV9N/lostit">
+    <img src="https://img.shields.io/badge/Trello-Link-red?style=for-the-badge&logoColor=white" alt="Trello">
+  </a>
 </div>
 <hr>
 <div align="center">  
