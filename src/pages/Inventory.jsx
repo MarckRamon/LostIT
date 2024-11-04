@@ -50,7 +50,7 @@ const initialFormState = {
   category: '',
   description: '',
   location: '',
-  status: 'Active',
+  status: 'Unclaimed',
 };
 
 function Inventory() {
@@ -80,7 +80,6 @@ function Inventory() {
     try {
       setLoading(true);
       const response = await axiosInstance.get('/api/items/getAllItems');
-      console.log('Fetched items:', response.data);
       setItems(response.data);
       setError('');
     } catch (error) {
@@ -99,9 +98,9 @@ function Inventory() {
         category: item.category?.categoryId || item.categoryId || '',
         description: item.description || '',
         location: item.location?.locationId || item.locationId || '',
-        status: item.status || 'Active',
+        status: item.status || 'Unclaimed',
       });
-      setEditingId(item.id);
+      setEditingId(item.itemId);
     } else {
       setFormData(initialFormState);
       setEditingId(null);
@@ -139,9 +138,9 @@ function Inventory() {
       };
 
       if (editingId) {
-        await axiosInstance.put(`/api/items/updateItemDetails?id=${editingId}`, requestData);
+        await axiosInstance.put(`/api/items/updateItem/${editingId}`, requestData);
         setSuccessMessage('Item updated successfully!');
-      } else {
+    } else {
         await axiosInstance.post('/api/items/addItem', requestData);
         setSuccessMessage('Item added successfully!');
       }
@@ -156,11 +155,11 @@ function Inventory() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (itemId) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
         setLoading(true);
-        await axiosInstance.delete(`/api/items/deleteItem/${id}`);
+        await axiosInstance.delete(`/api/items/deleteItem/${itemId}`);
         await fetchItems();
         setSuccessMessage('Item deleted successfully!');
       } catch (error) {
@@ -177,40 +176,26 @@ function Inventory() {
     item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getCategoryName = (categoryId) => {
-    if (!categoryId) return 'N/A';
+const getCategoryName = (categoryId) => {
     const category = categories.find(c => c.id === parseInt(categoryId));
     return category ? category.name : 'N/A';
-  };
+};
 
-  const getLocationName = (locationId) => {
-    if (!locationId) return 'N/A';
+const getLocationName = (locationId) => {
     const location = locations.find(l => l.id === parseInt(locationId));
     return location ? location.name : 'N/A';
-  };
+};
 
   return (
     <Box sx={{ p: 3 }}>
       {successMessage && (
-        <Box sx={{ 
-          mb: 2, 
-          p: 2, 
-          bgcolor: 'success.light', 
-          color: 'success.contrastText',
-          borderRadius: 1
-        }}>
+        <Box sx={{ mb: 2, p: 2, bgcolor: 'success.light', color: 'success.contrastText', borderRadius: 1 }}>
           {successMessage}
         </Box>
       )}
 
       {error && (
-        <Box sx={{ 
-          mb: 2, 
-          p: 2, 
-          bgcolor: 'error.light', 
-          color: 'error.contrastText',
-          borderRadius: 1
-        }}>
+        <Box sx={{ mb: 2, p: 2, bgcolor: 'error.light', color: 'error.contrastText', borderRadius: 1 }}>
           {error}
         </Box>
       )}
@@ -256,28 +241,18 @@ function Inventory() {
               </TableRow>
             ) : (
               filteredItems.map((item) => (
-                <TableRow key={item.id || crypto.randomUUID()}>
-                  <TableCell>{item.id !== undefined ? item.id : 'N/A'}</TableCell>
+                <TableRow key={item.itemId}>
+                  <TableCell>{item.itemId || 'N/A'}</TableCell>
                   <TableCell>{item.itemName || 'N/A'}</TableCell>
-                  <TableCell>
-                    {getCategoryName(item.categoryId || item.category?.categoryId)}
-                  </TableCell>
-                  <TableCell>
-                    {getLocationName(item.locationId || item.location?.locationId)}
-                  </TableCell>
+                  <TableCell>{getCategoryName(item.categoryId || item.category?.categoryId)}</TableCell>
+                  <TableCell>{getLocationName(item.locationId || item.location?.locationId)}</TableCell>
                   <TableCell>{item.description || 'N/A'}</TableCell>
                   <TableCell>{item.status || 'N/A'}</TableCell>
                   <TableCell>
-                    <IconButton 
-                      onClick={() => handleOpenDialog(item)}
-                      disabled={loading}
-                    >
+                    <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
                       <EditIcon />
                     </IconButton>
-                    <IconButton 
-                      onClick={() => handleDelete(item.id)}
-                      disabled={loading}
-                    >
+                    <IconButton onClick={() => handleDelete(item.itemId)} disabled={loading}>
                       <DeleteIcon />
                     </IconButton>
                   </TableCell>
@@ -286,96 +261,73 @@ function Inventory() {
             )}
           </TableBody>
         </Table>
-      </TableContainer >
+      </TableContainer>
 
-      <Dialog 
-        open={openDialog} 
-        onClose={handleCloseDialog} 
-        maxWidth="sm" 
-        fullWidth
-      >
-        <DialogTitle>
-          {editingId ? 'Edit Item' : 'Add New Item'}
-        </DialogTitle>
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>{editingId ? 'Edit Item' : 'Add New Item'}</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-            {error && (
-              <Box sx={{ color: 'error.main', mb: 2 }}>
-                {error}
-              </Box>
-            )}
-            <TextField
-              label="Item Name"
+          <TextField
+            label="Item Name"
+            fullWidth
+            value={formData.itemName}
+            onChange={(e) => setFormData({ ...formData, itemName: e.target.value })}
+            required
+            sx={{ mb: 2 }}
+          />
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               required
-              fullWidth
-              value={formData.itemName}
-              onChange={(e) => setFormData({ ...formData, itemName: e.target.value })}
-              error={!formData.itemName}
-              disabled={loading}
-            />
-            <FormControl fullWidth required error={!formData.category}>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={formData.category}
-                label="Category"
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                disabled={loading}
-              >
-                {categories.map((category) => (
-                  <MenuItem key={category.id} value={category.id}>
-                    {category.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth required error={!formData.location}>
-              <InputLabel>Location</InputLabel>
-              <Select
-                value={formData.location}
-                label="Location"
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                disabled={loading}
-              >
-                {locations.map((loc) => (
-                  <MenuItem key={loc.id} value={loc.id}>
-                    {loc.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Description"
-              fullWidth
-              multiline
-              rows={3}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              disabled={loading}
-            />
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={formData.status}
-                label="Status"
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                disabled={loading}
-              >
-                <MenuItem value="Active">Active</MenuItem>
-                <MenuItem value="Inactive">Inactive</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+            >
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Description"
+            fullWidth
+            multiline
+            rows={3}
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            sx={{ mb: 2 }}
+          />
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Location</InputLabel>
+            <Select
+              value={formData.location}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              required
+            >
+              {locations.map((location) => (
+                <MenuItem key={location.id} value={location.id}>
+                  {location.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            >
+              <MenuItem value="Unclaimed">Unclaimed</MenuItem>
+              <MenuItem value="Claimed">Claimed</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} disabled={loading}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={loading}
-            variant="contained"
-          >
-            {loading ? 'Saving...' : (editingId ? 'Update' : 'Add')}
+          <Button onClick={handleSubmit} variant="contained" disabled={loading}>
+            {editingId ? 'Update Item' : 'Add Item'}
           </Button>
         </DialogActions>
       </Dialog>

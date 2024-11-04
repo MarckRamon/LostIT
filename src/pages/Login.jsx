@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import {
   Container,
   Card,
@@ -13,31 +14,41 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 function Login() {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const [adminList, setAdminList] = useState([]);
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    // Fetch admin accounts from backend
+    axios.get('http://localhost:8080/api/admins/getAllAdmins')
+      .then(response => setAdminList(response.data))
+      .catch(error => console.error("Error fetching admin accounts:", error));
+  }, []);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
 
-    try {
-      // PUT API HERE
-      // const response = await axios.post('/api/login', formData);
-      login({ username: formData.username });
-
-      // Play audio on successful login
-      const audio = new Audio('/you.mp3'); // Update the path to your audio file
-      audio.play();
-
-      navigate('/');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+    const user = adminList.find(user => user.username === formData.username);
+    if (!user) {
+      setError('Email not found');
+      return;
     }
+    if (user.password !== formData.password) {
+      setError('Invalid password');
+      return;
+    }
+
+    // Successful login
+    login({ username: user.username });
+
+    // Play audio on successful login
+    const audio = new Audio('/you.mp3');
+    audio.play();
+
+    navigate('/');
   };
 
   return (

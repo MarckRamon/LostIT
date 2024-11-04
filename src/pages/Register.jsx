@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import {
   Container,
   Card,
@@ -18,6 +19,7 @@ function Register() {
     confirmPassword: '',
     email: '',
     fullName: '',
+    phoneNumber: '',
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -32,8 +34,15 @@ function Register() {
     }
 
     try {
-      // PUT APi HERE
-      // const response = await axios.post('/api/register', formData);
+      // Send data to the backend
+      await axios.post('http://localhost:8080/api/admins/createAdmin', {
+        username: formData.username,
+        password: formData.password,
+        email: formData.email,
+        fullName: formData.fullName,
+        phoneNumber: formData.phoneNumber,
+      });
+
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
@@ -81,6 +90,14 @@ function Register() {
               margin="normal"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              required
+            />
+            <TextField
+              fullWidth
+              label="Phone Number"
+              margin="normal"
+              value={formData.phoneNumber}
+              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
               required
             />
             <TextField
