@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import {
-  Container,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Alert,
-} from '@mui/material';
+import './Login.css';
 import { useAuth } from '../context/AuthContext';
 
 function Login() {
@@ -19,6 +10,7 @@ function Login() {
   const [adminList, setAdminList] = useState([]);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     // Fetch admin accounts from backend
@@ -42,70 +34,81 @@ function Login() {
     }
 
     login({ username: user.username });
-    
-    const audio = new Audio('/you.mp3');
-    audio.play();
-
+    document.getElementById('bgMusic').play();
     navigate('/');
   };
 
-  return (
-    <Container maxWidth="sm" sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
-      <Card sx={{ width: '100%', p: 4 }}>
-        <CardContent>
-          <Typography variant="h4" align="center" gutterBottom>
-            Welcome Back
-          </Typography>
-          <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 4 }}>
-            Enter your credentials to access your account
-          </Typography>
-          
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
+  const toggleMusic = () => {
+    const audio = document.getElementById('bgMusic');
+    if (isPlaying) audio.pause();
+    else audio.play();
+    setIsPlaying(!isPlaying);
+  };
 
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Username"
-              margin="normal"
+  const toggleVideo = () => {
+    const video = document.getElementById('bgVideo');
+    if (video.paused) video.play();
+    else video.pause();
+  };
+
+  return (
+    <div className="login-container">
+      <video className="video-background" autoPlay muted loop id="bgVideo">
+        <source src="/livebg.mp4" type="video/mp4" />
+      </video>
+      <div className="background-overlay"></div>
+
+      <div className="login-box">
+        <div className="logo">Login</div>
+        
+        {error && <div className="error-message">{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              placeholder="Enter your username"
               required
             />
-            <TextField
-              fullWidth
-              label="Password"
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
               type="password"
-              margin="normal"
+              id="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="Enter your password"
               required
             />
-            <Button
-              fullWidth
-              variant="contained"
-              size="large"
-              type="submit"
-              sx={{ mt: 3 }}
-            >
-              Log In
-            </Button>
-          </form>
-          
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              Don't have an account?{' '}
-              <Link to="/register" style={{ color: 'primary.main', textDecoration: 'none' }}>
-                Register
-              </Link>
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-    </Container>
+          </div>
+
+          <button type="submit" className="login-button">Login</button>
+
+          <div className="links">
+            <Link to="/register">Register now</Link>
+            <Link to="/forgot-password">Forgot password?</Link>
+          </div>
+        </form>
+      </div>
+
+      <div className="audio-controls" onClick={toggleMusic} title="Toggle music">
+        🎵
+      </div>
+
+      <div className="video-controls" onClick={toggleVideo} title="Toggle video">
+        🎬
+      </div>
+
+      <audio id="bgMusic" loop>
+        <source src="/you.mp3" type="audio/mp3" />
+      </audio>
+    </div>
   );
 }
 

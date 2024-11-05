@@ -29,6 +29,7 @@ const initialFormState = {
   description: '',
   location: '',
   status: 'Unclaimed',
+  dateAdded: '',
 };
 
 function Inventory() {
@@ -69,6 +70,7 @@ function Inventory() {
         locationId: item.locationId || (item.location && item.location.id),
         description: item.description,
         status: item.status,
+        dateAdded: item.dateAdded || '',
         category: item.category,
         location: item.location
       }));
@@ -126,6 +128,7 @@ function Inventory() {
         description: item.description || '',
         location: item.locationId || item.location?.id || '',
         status: item.status || 'Unclaimed',
+        dateAdded: item.dateAdded || '',
       });
       setEditingId(item.id || item.itemId);
     } else {
@@ -156,6 +159,7 @@ function Inventory() {
         itemName: formData.itemName.trim(),
         description: formData.description.trim(),
         status: formData.status,
+        dateAdded: formData.dateAdded,
         category: { categoryId: parseInt(formData.category) },
         location: { locationId: parseInt(formData.location) }
       };
@@ -244,6 +248,7 @@ function Inventory() {
               <TableCell>Location</TableCell>
               <TableCell>Description</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Date Added</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -263,6 +268,7 @@ function Inventory() {
               <TableCell>{getLocationName(item)}</TableCell>
               <TableCell>{item.description || 'N/A'}</TableCell>
               <TableCell>{item.status || 'N/A'}</TableCell>
+              <TableCell>{item.dateAdded || 'N/A'}</TableCell>
               <TableCell>
                 <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
                   <EditIcon />
@@ -351,6 +357,15 @@ function Inventory() {
               <MenuItem value="Claimed">Claimed</MenuItem>
             </Select>
           </FormControl>
+          <TextField
+            label="Date Added"
+            type="date"
+            value={formData.dateAdded}
+            onChange={(e) => setFormData({ ...formData, dateAdded: e.target.value })}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="secondary">
