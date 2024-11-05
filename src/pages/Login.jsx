@@ -41,10 +41,8 @@ function Login() {
       return;
     }
 
-    // Successful login
     login({ username: user.username });
-
-    // Play audio on successful login
+    
     const audio = new Audio('/you.mp3');
     audio.play();
 

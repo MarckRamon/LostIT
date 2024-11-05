@@ -23,28 +23,6 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import axiosInstance from '../axiosInstance';
 
-const categories = [
-  { id: 1, name: 'Electronics' },
-  { id: 2, name: 'Furniture' },
-  { id: 3, name: 'Office Supplies' },
-  { id: 4, name: 'Books' },
-  { id: 5, name: 'Kitchen' },
-  { id: 6, name: 'Others' },
-];
-
-const locations = [
-  { id: 1, name: 'NGE' },
-  { id: 2, name: 'GLE' },
-  { id: 3, name: 'RTL' },
-  { id: 4, name: 'ACAD' },
-  { id: 5, name: 'LIBRARY' },
-  { id: 6, name: 'ALLIED' },
-  { id: 7, name: 'CANTEEN' },
-  { id: 8, name: 'PARKING LOT' },
-  { id: 9, name: 'GUARD HOUSE' },
-  { id: 10, name: 'ACCOUNTING' },
-];
-
 const initialFormState = {
   itemName: '',
   category: '',
@@ -62,9 +40,13 @@ function Inventory() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [locations, setLocations] = useState([]);
 
   useEffect(() => {
     fetchItems();
+    fetchCategories();
+    fetchLocations();
   }, []);
 
   useEffect(() => {
@@ -80,7 +62,17 @@ function Inventory() {
     try {
       setLoading(true);
       const response = await axiosInstance.get('/api/items/getAllItems');
-      setItems(response.data);
+      const transformedItems = response.data.map(item => ({
+        itemId: item.itemId || item.id,
+        itemName: item.itemName,
+        categoryId: item.categoryId || (item.category && item.category.id),
+        locationId: item.locationId || (item.location && item.location.id),
+        description: item.description,
+        status: item.status,
+        category: item.category,
+        location: item.location
+      }));
+      setItems(transformedItems);
       setError('');
     } catch (error) {
       console.error("Error fetching items:", error);
@@ -90,17 +82,52 @@ function Inventory() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await axiosInstance.get('/api/categories/getAllCategories');
+      console.log('Categories response:', response.data);
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setError("Failed to fetch categories.");
+    }
+  };
+
+  const fetchLocations = async () => {
+    try {
+      const response = await axiosInstance.get('/api/locations/getAllLocations');
+      console.log('Locations response:', response.data);
+      setLocations(response.data);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+      setError("Failed to fetch locations.");
+    }
+  };
+
+  const getCategoryName = (item) => {
+    if (!item.category) return 'N/A';
+    return item.category.categoryName || 'N/A';
+  };
+
+
+  const getLocationName = (item) => {
+    if (!item.location) return 'N/A';
+    return item.location.locationBuilding && item.location.locationFloor
+      ? `${item.location.locationBuilding} - ${item.location.locationFloor}`
+      : 'N/A';
+  };
+
   const handleOpenDialog = (item = null) => {
     setError('');
     if (item) {
       setFormData({
         itemName: item.itemName || '',
-        category: item.category?.categoryId || item.categoryId || '',
+        category: item.categoryId || item.category?.id || '',
         description: item.description || '',
-        location: item.location?.locationId || item.locationId || '',
+        location: item.locationId || item.location?.id || '',
         status: item.status || 'Unclaimed',
       });
-      setEditingId(item.itemId);
+      setEditingId(item.id || item.itemId);
     } else {
       setFormData(initialFormState);
       setEditingId(null);
@@ -129,18 +156,16 @@ function Inventory() {
         itemName: formData.itemName.trim(),
         description: formData.description.trim(),
         status: formData.status,
-        category: {
-          categoryId: parseInt(formData.category)
-        },
-        location: {
-          locationId: parseInt(formData.location)
-        }
+        category: { categoryId: parseInt(formData.category) },
+        location: { locationId: parseInt(formData.location) }
       };
+
+      console.log('Submitting data:', requestData);
 
       if (editingId) {
         await axiosInstance.put(`/api/items/updateItem/${editingId}`, requestData);
         setSuccessMessage('Item updated successfully!');
-    } else {
+      } else {
         await axiosInstance.post('/api/items/addItem', requestData);
         setSuccessMessage('Item added successfully!');
       }
@@ -175,16 +200,6 @@ function Inventory() {
     item.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-const getCategoryName = (categoryId) => {
-    const category = categories.find(c => c.id === parseInt(categoryId));
-    return category ? category.name : 'N/A';
-};
-
-const getLocationName = (locationId) => {
-    const location = locations.find(l => l.id === parseInt(locationId));
-    return location ? location.name : 'N/A';
-};
 
   return (
     <Box sx={{ p: 3 }}>
@@ -234,32 +249,32 @@ const getLocationName = (locationId) => {
           </TableHead>
           <TableBody>
             {filteredItems.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} align="center">
-                  {loading ? 'Loading...' : 'No items found'}
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredItems.map((item) => (
-                <TableRow key={item.itemId}>
-                  <TableCell>{item.itemId || 'N/A'}</TableCell>
-                  <TableCell>{item.itemName || 'N/A'}</TableCell>
-                  <TableCell>{getCategoryName(item.categoryId || item.category?.categoryId)}</TableCell>
-                  <TableCell>{getLocationName(item.locationId || item.location?.locationId)}</TableCell>
-                  <TableCell>{item.description || 'N/A'}</TableCell>
-                  <TableCell>{item.status || 'N/A'}</TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => handleDelete(item.itemId)} disabled={loading}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
+          <TableRow>
+            <TableCell colSpan={7} align="center">
+              {loading ? 'Loading...' : 'No items found'}
+            </TableCell>
+          </TableRow>
+        ) : (
+          filteredItems.map((item) => (
+            <TableRow key={item.itemId}>
+              <TableCell>{item.itemId}</TableCell>
+              <TableCell>{item.itemName || 'N/A'}</TableCell>
+              <TableCell>{getCategoryName(item)}</TableCell>
+              <TableCell>{getLocationName(item)}</TableCell>
+              <TableCell>{item.description || 'N/A'}</TableCell>
+              <TableCell>{item.status || 'N/A'}</TableCell>
+              <TableCell>
+                <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
+                  <EditIcon />
+                </IconButton>
+                <IconButton onClick={() => handleDelete(item.itemId)} disabled={loading}>
+                  <DeleteIcon />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
+      </TableBody>
         </Table>
       </TableContainer>
 
@@ -272,18 +287,26 @@ const getLocationName = (locationId) => {
             value={formData.itemName}
             onChange={(e) => setFormData({ ...formData, itemName: e.target.value })}
             required
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, mt: 2 }}
           />
           <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Category</InputLabel>
+            <InputLabel id="category-label">Category</InputLabel>
             <Select
+              labelId="category-label"
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              onChange={(e) => {
+                console.log('Selected category:', e.target.value);
+                setFormData({ ...formData, category: e.target.value });
+              }}
               required
+              label="Category"
             >
               {categories.map((category) => (
-                <MenuItem key={category.id} value={category.id}>
-                  {category.name}
+                <MenuItem 
+                  key={category.id || category.categoryId} 
+                  value={category.id || category.categoryId}
+                >
+                  {category.name || category.categoryName}
                 </MenuItem>
               ))}
             </Select>
@@ -291,22 +314,28 @@ const getLocationName = (locationId) => {
           <TextField
             label="Description"
             fullWidth
-            multiline
-            rows={3}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             sx={{ mb: 2 }}
           />
           <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Location</InputLabel>
+            <InputLabel id="location-label">Location</InputLabel>
             <Select
+              labelId="location-label"
               value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              onChange={(e) => {
+                console.log('Selected location:', e.target.value);
+                setFormData({ ...formData, location: e.target.value });
+              }}
               required
+              label="Location"
             >
               {locations.map((location) => (
-                <MenuItem key={location.id} value={location.id}>
-                  {location.name}
+                <MenuItem 
+                  key={location.id || location.locationId} 
+                  value={location.id || location.locationId}
+                >
+                  {location.name || `${location.locationBuilding} - ${location.locationFloor}` || location.locationName}
                 </MenuItem>
               ))}
             </Select>
@@ -316,6 +345,7 @@ const getLocationName = (locationId) => {
             <Select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              label="Status"
             >
               <MenuItem value="Unclaimed">Unclaimed</MenuItem>
               <MenuItem value="Claimed">Claimed</MenuItem>
@@ -323,11 +353,11 @@ const getLocationName = (locationId) => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} disabled={loading}>
+          <Button onClick={handleCloseDialog} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-            {editingId ? 'Update Item' : 'Add Item'}
+          <Button onClick={handleSubmit} variant="contained" color="primary" disabled={loading}>
+            {editingId ? 'Save Changes' : 'Add Item'}
           </Button>
         </DialogActions>
       </Dialog>
