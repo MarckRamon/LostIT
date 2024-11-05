@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -19,6 +19,7 @@ import {
   Warning as WarningIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import axiosInstance from '../axiosInstance';
 
 function Dashboard() {
   const { user, updateUser } = useAuth();
@@ -28,12 +29,41 @@ function Dashboard() {
     email: user?.email || '',
     username: user?.username || '',
   });
+  const [stats, setStats] = useState({
+    totalItems: 0,
+    categories: 6, // Static as per your categories array length
+    lowStock: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Mock data for dashboard
-  const stats = {
-    totalItems: 150,
-    categories: 6,
-    lowStock: 8,
+  useEffect(() => {
+    fetchInventoryStats();
+  }, []);
+
+  const fetchInventoryStats = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get('/api/items/getAllItems');
+      const items = response.data;
+      
+      // Calculate stats from items
+      const totalItems = items.length;
+      // You can modify this logic based on what constitutes "low stock"
+      const lowStock = items.filter(item => item.status === "Unclaimed").length;
+
+      setStats({
+        totalItems,
+        categories: 6, // Static value from your categories array
+        lowStock,
+      });
+      setError('');
+    } catch (error) {
+      console.error("Error fetching inventory stats:", error);
+      setError("Failed to fetch inventory statistics");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpenDialog = () => {
@@ -78,7 +108,9 @@ function Dashboard() {
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <InventoryIcon sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
                 <Box>
-                  <Typography variant="h4">{stats.totalItems}</Typography>
+                  <Typography variant="h4">
+                    {loading ? '...' : stats.totalItems}
+                  </Typography>
                   <Typography color="text.secondary">Total Items</Typography>
                 </Box>
               </Box>
@@ -106,14 +138,23 @@ function Dashboard() {
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <WarningIcon sx={{ fontSize: 40, color: 'warning.main', mr: 2 }} />
                 <Box>
-                  <Typography variant="h4">{stats.lowStock}</Typography>
-                  <Typography color="text.secondary">Low Stock Items</Typography>
+                  <Typography variant="h4">
+                    {loading ? '...' : stats.lowStock}
+                  </Typography>
+                  <Typography color="text.secondary">Unclaimed Items</Typography>
                 </Box>
               </Box>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
+
+      {/* Error Message */}
+      {error && (
+        <Box sx={{ mt: 2, p: 2, bgcolor: 'error.light', color: 'error.contrastText', borderRadius: 1 }}>
+          {error}
+        </Box>
+      )}
 
       {/* Edit Profile Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
