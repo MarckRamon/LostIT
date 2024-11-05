@@ -54,7 +54,7 @@ function Login() {
   return (
     <div className="login-container">
       <video className="video-background" autoPlay muted loop id="bgVideo">
-        <source src="/livebg.mp4" type="video/mp4" />
+        <source src="/bg.mp4" type="video/mp4" />
       </video>
       <div className="background-overlay"></div>
 
