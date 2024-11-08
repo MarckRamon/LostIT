@@ -1,19 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './Login.css';
-import { useAuth } from '../context/AuthContext';
 
-function Login() {
-  const [formData, setFormData] = useState({ username: '', password: '' });
+function ForgotPassword() {
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [adminList, setAdminList] = useState([]);
-  const navigate = useNavigate();
-  const { login } = useAuth();
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    // Fetch admin accounts from backend
     axios.get('http://localhost:8080/api/admins/getAllAdmins')
       .then(response => setAdminList(response.data))
       .catch(error => console.error("Error fetching admin accounts:", error));
@@ -22,20 +19,15 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
-    const user = adminList.find(user => user.username === formData.username);
+    const user = adminList.find(user => user.email === email);
     if (!user) {
       setError('Email not found');
       return;
     }
-    if (user.password !== formData.password) {
-      setError('Invalid password');
-      return;
-    }
 
-    login({ username: user.username });
-    document.getElementById('bgMusic').play();
-    navigate('/');
+    setSuccess(`Your password is: ${user.password}`);
   };
 
   const toggleMusic = () => {
@@ -59,40 +51,29 @@ function Login() {
       <div className="background-overlay"></div>
 
       <div className="login-box">
-        <div className="logo">Login</div>
+        <div className="logo">Forgot Password</div>
         
         {error && <div className="error-message">{error}</div>}
+        {success && <div className="success-message">{success}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="email">Email</label>
             <input
               type="text"
-              id="username"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              placeholder="Enter your username"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
               required
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-
-          <button type="submit" className="login-button">Login</button>
+          <button type="submit" className="login-button">Retrieve Password</button>
 
           <div className="links">
-            <Link to="/register">Register now</Link>
-            <Link to="/forgot-password">Forgot password?</Link>
+            <Link to="/login">Back to Login</Link>
+            <Link to="/register">Register</Link>
           </div>
         </form>
       </div>
@@ -112,4 +93,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default ForgotPassword;

@@ -1,16 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import {
-  Container,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Alert,
-} from '@mui/material';
+import './Login.css';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -23,6 +14,7 @@ function Register() {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +26,6 @@ function Register() {
     }
 
     try {
-      // Send data to the backend
       await axios.post('http://localhost:8080/api/admins/createAdmin', {
         username: formData.username,
         password: formData.password,
@@ -49,97 +40,124 @@ function Register() {
     }
   };
 
+  const toggleMusic = () => {
+    const audio = document.getElementById('bgMusic');
+    if (isPlaying) audio.pause();
+    else audio.play();
+    setIsPlaying(!isPlaying);
+  };
+
+  const toggleVideo = () => {
+    const video = document.getElementById('bgVideo');
+    if (video.paused) video.play();
+    else video.pause();
+  };
+
   return (
-    <Container maxWidth="sm" sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
-      <Card sx={{ width: '100%', p: 4 }}>
-        <CardContent>
-          <Typography variant="h4" align="center" gutterBottom>
-            Create Account
-          </Typography>
-          <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 4 }}>
-            Fill in your details to create your account
-          </Typography>
+    <div className="login-container">
+      <video className="video-background" autoPlay muted loop id="bgVideo">
+        <source src="/ph.mp4" type="video/mp4" />
+      </video>
+      <div className="background-overlay"></div>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
+      <div className="login-box">
+        <div className="logo">Register</div>
+        
+        {error && <div className="error-message">{error}</div>}
 
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Full Name"
-              margin="normal"
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="fullName">Full Name</label>
+            <input
+              type="text"
+              id="fullName"
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+              placeholder="Enter your full name"
               required
             />
-            <TextField
-              fullWidth
-              label="Email"
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
               type="email"
-              margin="normal"
+              id="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="Enter your email"
               required
             />
-            <TextField
-              fullWidth
-              label="Username"
-              margin="normal"
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              placeholder="Choose a username"
               required
             />
-            <TextField
-              fullWidth
-              label="Phone Number"
-              margin="normal"
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="phoneNumber">Phone Number</label>
+            <input
+              type="tel"
+              id="phoneNumber"
               value={formData.phoneNumber}
               onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+              placeholder="Enter your phone number"
               required
             />
-            <TextField
-              fullWidth
-              label="Password"
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
               type="password"
-              margin="normal"
+              id="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="Choose a password"
               required
             />
-            <TextField
-              fullWidth
-              label="Confirm Password"
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
               type="password"
-              margin="normal"
+              id="confirmPassword"
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              placeholder="Confirm your password"
               required
             />
-            <Button
-              fullWidth
-              variant="contained"
-              size="large"
-              type="submit"
-              sx={{ mt: 3 }}
-            >
-              Register
-            </Button>
-          </form>
+          </div>
 
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              Already have an account?{' '}
-              <Link to="/login" style={{ color: 'primary.main', textDecoration: 'none' }}>
-                Login
-              </Link>
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-    </Container>
+          <button type="submit" className="login-button">Register</button>
+
+          <div className="links">
+            <Link to="/login">Already have an account? Login</Link>
+          </div>
+        </form>
+      </div>
+
+      <div className="audio-controls" onClick={toggleMusic} title="Toggle music">
+        🎵
+      </div>
+
+      <div className="video-controls" onClick={toggleVideo} title="Toggle video">
+        🎬
+      </div>
+
+      <audio id="bgMusic" loop>
+        <source src="/you.mp3" type="audio/mp3" />
+      </audio>
+    </div>
   );
 }
 
