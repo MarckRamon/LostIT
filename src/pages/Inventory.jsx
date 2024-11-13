@@ -32,11 +32,24 @@ const initialFormState = {
   dateAdded: '',
 };
 
+const initialLocationState = {
+  locationBuilding: '',
+  locationFloor: '',
+};
+
+const initialCategoryState = {
+  categoryName: '',
+};
+
 function Inventory() {
   const [items, setItems] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openMainDialog, setOpenMainDialog] = useState(false);
+  const [openLocationDialog, setOpenLocationDialog] = useState(false);
+  const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState(initialFormState);
+  const [locationData, setLocationData] = useState(initialLocationState);
+  const [categoryData, setCategoryData] = useState(initialCategoryState);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -119,6 +132,8 @@ function Inventory() {
       : 'N/A';
   };
 
+  /* handlers */
+
   const handleOpenDialog = (item = null) => {
     setError('');
     if (item) {
@@ -130,22 +145,22 @@ function Inventory() {
         status: item.status || 'Unclaimed',
         dateAdded: item.dateAdded || '',
       });
-      setEditingId(item.id || item.itemId);
+      setEditingId(item.itemId);
     } else {
       setFormData(initialFormState);
       setEditingId(null);
     }
-    setOpenDialog(true);
+    setOpenMainDialog(true);
   };
 
   const handleCloseDialog = () => {
-    setOpenDialog(false);
+    setOpenMainDialog(false);
     setFormData(initialFormState);
     setEditingId(null);
     setError('');
   };
 
-  const handleSubmit = async () => {
+  const handleAddItem = async () => {
     if (!formData.itemName || !formData.category || !formData.location) {
       setError("Please fill in all required fields.");
       return;
@@ -164,21 +179,47 @@ function Inventory() {
         location: { locationId: parseInt(formData.location) }
       };
 
-      console.log('Submitting data:', requestData);
-
-      if (editingId) {
-        await axiosInstance.put(`/api/items/updateItem/${editingId}`, requestData);
-        setSuccessMessage('Item updated successfully!');
-      } else {
-        await axiosInstance.post('/api/items/addItem', requestData);
-        setSuccessMessage('Item added successfully!');
-      }
-
+      await axiosInstance.post('/api/items/addItem', requestData);
+      setSuccessMessage('Item added successfully!');
       await fetchItems();
-      handleCloseDialog();
+      setOpenMainDialog(false);
+      setFormData(initialFormState);
     } catch (error) {
-      console.error("Error saving item:", error);
-      setError(error.response?.data?.message || "Error saving item. Please try again.");
+      console.error("Error adding item:", error);
+      setError(error.response?.data?.message || "Error adding item. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditItem = async () => {
+    if (!formData.itemName || !formData.category || !formData.location) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const requestData = {
+        itemName: formData.itemName.trim(),
+        description: formData.description.trim(),
+        status: formData.status,
+        dateAdded: formData.dateAdded,
+        category: { categoryId: parseInt(formData.category) },
+        location: { locationId: parseInt(formData.location) }
+      };
+
+      await axiosInstance.put(`/api/items/updateItem/${editingId}`, requestData);
+      setSuccessMessage('Item updated successfully!');
+      await fetchItems();
+      setOpenMainDialog(false);
+      setFormData(initialFormState);
+      setEditingId(null);
+    } catch (error) {
+      console.error("Error updating item:", error);
+      setError(error.response?.data?.message || "Error updating item. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -204,6 +245,66 @@ function Inventory() {
     item.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleOpenLocationDialog = () => {
+    setLocationData(initialLocationState);
+    setOpenLocationDialog(true);
+  };
+
+  const handleCloseLocationDialog = () => {
+    setLocationData(initialLocationState);
+    setOpenLocationDialog(false);
+  };
+
+  const handleOpenCategoryDialog = () => {
+    setCategoryData(initialCategoryState);
+    setOpenCategoryDialog(true);
+  };
+
+  const handleCloseCategoryDialog = () => {
+    setCategoryData(initialCategoryState);
+    setOpenCategoryDialog(false);
+  };
+
+  const handleAddLocation = async () => {
+    if (!locationData.locationBuilding || !locationData.locationFloor) {
+      setError("Please fill in all location fields");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await axiosInstance.post('/api/locations/createLocation', locationData);
+      await fetchLocations();
+      setSuccessMessage('Location added successfully!');
+      handleCloseLocationDialog();
+    } catch (error) {
+      console.error("Error adding location:", error);
+      setError(error.response?.data?.message || "Error adding location. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!categoryData.categoryName) {
+      setError("Please fill in the category name");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await axiosInstance.post('/api/categories/createCategory', categoryData);
+      await fetchCategories();
+      setSuccessMessage('Category added successfully!');
+      handleCloseCategoryDialog();
+    } catch (error) {
+      console.error("Error adding category:", error);
+      setError(error.response?.data?.message || "Error adding category. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box sx={{ p: 3 }}>
@@ -231,7 +332,7 @@ function Inventory() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
+          onClick={() => setOpenMainDialog(true)}
           disabled={loading}
         >
           Add New Item
@@ -254,37 +355,50 @@ function Inventory() {
           </TableHead>
           <TableBody>
             {filteredItems.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={7} align="center">
-              {loading ? 'Loading...' : 'No items found'}
-            </TableCell>
-          </TableRow>
-        ) : (
-          filteredItems.map((item) => (
-            <TableRow key={item.itemId}>
-              <TableCell>{item.itemId}</TableCell>
-              <TableCell>{item.itemName || 'N/A'}</TableCell>
-              <TableCell>{getCategoryName(item)}</TableCell>
-              <TableCell>{getLocationName(item)}</TableCell>
-              <TableCell>{item.description || 'N/A'}</TableCell>
-              <TableCell>{item.status || 'N/A'}</TableCell>
-              <TableCell>{item.dateAdded || 'N/A'}</TableCell>
-              <TableCell>
-                <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton onClick={() => handleDelete(item.itemId)} disabled={loading}>
-                  <DeleteIcon />
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))
-        )}
-      </TableBody>
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  {loading ? 'Loading...' : 'No items found'}
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredItems.map((item) => (
+                <TableRow key={item.itemId}>
+                  <TableCell>{item.itemId}</TableCell>
+                  <TableCell>{item.itemName || 'N/A'}</TableCell>
+                  <TableCell>{getCategoryName(item)}</TableCell>
+                  <TableCell>{getLocationName(item)}</TableCell>
+                  <TableCell>{item.description || 'N/A'}</TableCell>
+                  <TableCell>{item.status || 'N/A'}</TableCell>
+                  <TableCell>{item.dateAdded || 'N/A'}</TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete(item.itemId)} disabled={loading}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
         </Table>
       </TableContainer>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+
+      {/* Add Item Dialog or Main Dialog */}
+      <Dialog
+        open={openMainDialog}
+        disableBackdropClick
+        disableEscapeKeyDown
+        onClose={(event, reason) => {
+          if (reason !== "backdropClick" && reason !== "escapeKeyDown") {
+            handleCloseDialog();
+          }
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>{editingId ? 'Edit Item' : 'Add New Item'}</DialogTitle>
         <DialogContent>
           <TextField
@@ -300,23 +414,30 @@ function Inventory() {
             <Select
               labelId="category-label"
               value={formData.category}
-              onChange={(e) => {
-                console.log('Selected category:', e.target.value);
-                setFormData({ ...formData, category: e.target.value });
-              }}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               required
               label="Category"
             >
               {categories.map((category) => (
-                <MenuItem 
-                  key={category.id || category.categoryId} 
+                <MenuItem
+                  key={category.id || category.categoryId}
                   value={category.id || category.categoryId}
                 >
                   {category.name || category.categoryName}
                 </MenuItem>
               ))}
             </Select>
+            <Button
+              onClick={handleOpenCategoryDialog}
+              variant="contained"
+              color="primary"
+              sx={{ mt: 1 }}
+              disabled={loading}
+            >
+              Add Category
+            </Button>
           </FormControl>
+
           <TextField
             label="Description"
             fullWidth
@@ -324,28 +445,36 @@ function Inventory() {
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             sx={{ mb: 2 }}
           />
+
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel id="location-label">Location</InputLabel>
             <Select
               labelId="location-label"
               value={formData.location}
-              onChange={(e) => {
-                console.log('Selected location:', e.target.value);
-                setFormData({ ...formData, location: e.target.value });
-              }}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               required
               label="Location"
             >
               {locations.map((location) => (
-                <MenuItem 
-                  key={location.id || location.locationId} 
+                <MenuItem
+                  key={location.id || location.locationId}
                   value={location.id || location.locationId}
                 >
                   {location.name || `${location.locationBuilding} - ${location.locationFloor}` || location.locationName}
                 </MenuItem>
               ))}
             </Select>
+            <Button
+              onClick={handleOpenLocationDialog}
+              variant="contained"
+              color="primary"
+              sx={{ mt: 1 }}
+              disabled={loading}
+            >
+              Add Location
+            </Button>
           </FormControl>
+
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>Status</InputLabel>
             <Select
@@ -357,6 +486,7 @@ function Inventory() {
               <MenuItem value="Claimed">Claimed</MenuItem>
             </Select>
           </FormControl>
+
           <TextField
             label="Date Added"
             type="date"
@@ -371,8 +501,84 @@ function Inventory() {
           <Button onClick={handleCloseDialog} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} variant="contained" color="primary" disabled={loading}>
+          <Button onClick={editingId ? handleEditItem : handleAddItem} variant="contained" color="primary" disabled={loading}>
             {editingId ? 'Save Changes' : 'Add Item'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Category Dialog */}
+      <Dialog
+        open={openCategoryDialog}
+        onClose={(event, reason) => {
+          if (reason !== "backdropClick" && reason !== "escapeKeyDown") {
+            handleCloseCategoryDialog();
+          }
+        }}
+        disableBackdropClick
+        disableEscapeKeyDown
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Add New Category</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Category Name"
+            fullWidth
+            value={categoryData.categoryName}
+            onChange={(e) => setCategoryData({ ...categoryData, categoryName: e.target.value })}
+            required
+            sx={{ mb: 2, mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseCategoryDialog} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleAddCategory} variant="contained" color="primary" disabled={loading}>
+            Add Category
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Location Dialog */}
+      <Dialog
+        open={openLocationDialog}
+        onClose={(event, reason) => {
+          if (reason !== "backdropClick" && reason !== "escapeKeyDown") {
+            handleCloseLocationDialog();
+          }
+        }}
+        disableBackdropClick
+        disableEscapeKeyDown
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Add New Location</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Building"
+            fullWidth
+            value={locationData.locationBuilding}
+            onChange={(e) => setLocationData({ ...locationData, locationBuilding: e.target.value })}
+            required
+            sx={{ mb: 2, mt: 2 }}
+          />
+          <TextField
+            label="Floor"
+            fullWidth
+            value={locationData.locationFloor}
+            onChange={(e) => setLocationData({ ...locationData, locationFloor: e.target.value })}
+            required
+            sx={{ mb: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseLocationDialog} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleAddLocation} variant="contained" color="primary" disabled={loading}>
+            Add Location
           </Button>
         </DialogActions>
       </Dialog>
