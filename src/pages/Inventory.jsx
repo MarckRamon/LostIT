@@ -30,7 +30,7 @@ const initialFormState = {
   description: '',
   location: '',
   status: 'Unclaimed',
-  dateAdded: '',
+  date: '',
 };
 
 function Inventory() {
@@ -84,7 +84,7 @@ function Inventory() {
         locationId: item.locationId || (item.location && item.location.id),
         description: item.description,
         status: item.status,
-        dateAdded: item.dateAdded || '',
+        date: item.date || '',
         category: item.category,
         location: item.location
       }));
@@ -142,7 +142,7 @@ function Inventory() {
         description: item.description || '',
         location: item.locationId || item.location?.id || '',
         status: item.status || 'Unclaimed',
-        dateAdded: item.dateAdded || '',
+        date: item.date || '',
       });
       setEditingId(item.id || item.itemId);
     } else {
@@ -173,7 +173,7 @@ function Inventory() {
         itemName: formData.itemName.trim(),
         description: formData.description.trim(),
         status: formData.status,
-        dateAdded: formData.dateAdded,
+        date: formData.date,
         category: { categoryId: parseInt(formData.category) },
         location: { locationId: parseInt(formData.location) }
       };
@@ -242,7 +242,7 @@ function Inventory() {
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         <TextField
-          placeholder="Search items..."
+          placeholder="Search items"
           variant="outlined"
           size="small"
           value={searchTerm}
@@ -250,40 +250,40 @@ function Inventory() {
           sx={{ width: 300 }}
         />
         <FormControl sx={{ minWidth: 120, mx: 1 }}>
-  <InputLabel>Category</InputLabel>
-  <Select
-    value={selectedCategory || ''} // Display as empty if null
-    onChange={handleCategoryChange}
-    label="Category"
-  >
-    <MenuItem value="">
-      <em>All</em>
-    </MenuItem>
-    {categories.map((category) => (
-      <MenuItem key={category.id || category.categoryId} value={category.id || category.categoryId}>
-        {category.name || category.categoryName}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
+          <InputLabel>Category</InputLabel>
+          <Select
+            value={selectedCategory || ''} 
+            onChange={handleCategoryChange}
+            label="Category"
+          >
+            <MenuItem value="">
+              <em>All</em>
+            </MenuItem>
+            {categories.map((category) => (
+              <MenuItem key={category.id || category.categoryId} value={category.id || category.categoryId}>
+                {category.name || category.categoryName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-<FormControl sx={{ minWidth: 120, mx: 1 }}>
-  <InputLabel>Location</InputLabel>
-  <Select
-    value={selectedLocation || ''} // Display as empty if null
-    onChange={handleLocationChange}
-    label="Location"
-  >
-    <MenuItem value="">
-      <em>All</em>
-    </MenuItem>
-    {locations.map((location) => (
-      <MenuItem key={location.id || location.locationId} value={location.id || location.locationId}>
-        {location.name || `${location.locationBuilding} - ${location.locationFloor}` || location.locationName}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
+        <FormControl sx={{ minWidth: 120, mx: 1 }}>
+          <InputLabel>Location</InputLabel>
+          <Select
+            value={selectedLocation || ''} 
+            onChange={handleLocationChange}
+            label="Location"
+          >
+            <MenuItem value="">
+              <em>All</em>
+            </MenuItem>
+            {locations.map((location) => (
+              <MenuItem key={location.id || location.locationId} value={location.id || location.locationId}>
+                {location.name || `${location.locationBuilding} - ${location.locationFloor}` || location.locationName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <FormControl sx={{ minWidth: 120, mx: 1}}>
           <InputLabel>Status</InputLabel>
           <Select
@@ -338,7 +338,7 @@ function Inventory() {
                   <TableCell>{getLocationName(item)}</TableCell>
                   <TableCell>{item.description || 'N/A'}</TableCell>
                   <TableCell>{item.status || 'N/A'}</TableCell>
-                  <TableCell>{item.dateAdded || 'N/A'}</TableCell>
+                  <TableCell>{item.date || 'N/A'}</TableCell>
                   <TableCell>
                       <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
                       <EditIcon />
@@ -430,8 +430,8 @@ function Inventory() {
           <TextField
             label="Date Added"
             type="date"
-            value={formData.dateAdded}
-            onChange={(e) => setFormData({ ...formData, dateAdded: e.target.value })}
+            value={formData.date}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
