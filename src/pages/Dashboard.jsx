@@ -25,12 +25,10 @@ import {
   SportsBasketball as SportsIcon,
   Restaurant as FoodIcon,
   Inventory as MiscIcon,
-  Inventory2 as ProductIcon,
-  Warning as LowStockIcon,
-  RemoveShoppingCart as OutOfStockIcon,
-  LocalShipping as SupplierIcon,
-  TrendingUp as TrendingIcon,
+  TaskAltOutlined as ProductIcon,
+  Cancel as TrendingIcon,
   ArrowForward as ArrowIcon,
+  Window as Windows,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosInstance';
@@ -44,25 +42,23 @@ function Dashboard() {
     username: user?.username || '',
   });
   const [stats, setStats] = useState({
+    claimed: 0,
     totalItems: 0,
-    lowStock: 0,
-    outOfStock: 0,
-    suppliers: 5,
+    unclaimed: 0,
     stockValue: 0,
     unfulfilled: 0,
     received: 0,
   });
+  const [categoryData, setCategoryData] = useState([
+    { name: 'Electronics', count: 0, icon: ElectronicsIcon },
+    { name: 'Clothing', count: 0, icon: ClothingIcon },
+    { name: 'Accessories', count: 0, icon: AccessoriesIcon },
+    { name: 'Books', count: 0, icon: BooksIcon },
+    { name: 'Tools', count: 0, icon: ToolsIcon },
+  ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Sample category data
-  const categoryData = [
-    { name: 'Electronics', value: 30, icon: ElectronicsIcon },
-    { name: 'Clothing', value: 25, icon: ClothingIcon },
-    { name: 'Accessories', value: 20, icon: AccessoriesIcon },
-    { name: 'Books', value: 15, icon: BooksIcon },
-    { name: 'Tools', value: 10, icon: ToolsIcon },
-  ];
+  const [maxCount, setMaxCount] = useState(0);
 
   useEffect(() => {
     fetchInventoryStats();
@@ -71,24 +67,62 @@ function Dashboard() {
   const fetchInventoryStats = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/api/items/getAllItems');
-      const items = response.data;
-      
-      // Calculate stats from items
+  
+      // Fetch items data from API
+      const [itemsResponse] = await Promise.all([
+        axiosInstance.get('/api/items/getAllItems')
+      ]);
+      const items = itemsResponse.data;
+  
+      // Debug: Log items data to ensure it's correct
+      console.log("Fetched items:", items);
+  
+      // Check if items have the expected structure
+      const claimed = items.filter(item => item.claimed === true).length;
       const totalItems = items.length;
-      const lowStock = items.filter(item => item.quantity < 10).length;
-      const outOfStock = items.filter(item => item.quantity === 0).length;
+      const unclaimed = items.filter(item => item.claimed === false).length;
       const stockValue = items.reduce((total, item) => total + (item.price * item.quantity), 0);
-
+  
+      // Update stats with the calculated values
       setStats({
+        claimed,
         totalItems,
-        lowStock,
-        outOfStock,
-        suppliers: 5,
+        unclaimed,
         stockValue,
-        unfulfilled: 4,
+        unfulfilled: 4, // Assuming static values for these two
         received: 1,
       });
+  
+      const categoryCounts = {
+        'Electronics': 0,
+        'Clothing': 0,
+        'Accessories': 0,
+        'Books': 0,
+        'Tools': 0
+      };
+  
+      let maxItemCount = 0;
+  
+      // Count items per category
+      items.forEach(item => {
+        const categoryName = item.category ? 
+          (item.category.categoryName || item.category.name) : 
+          'Uncategorized';
+        
+        if (categoryCounts.hasOwnProperty(categoryName)) {
+          categoryCounts[categoryName]++;
+          maxItemCount = Math.max(maxItemCount, categoryCounts[categoryName]);
+        }
+      });
+  
+      // Update category data state
+      const updatedCategoryData = categoryData.map(category => ({
+        ...category,
+        count: categoryCounts[category.name] || 0
+      }));
+  
+      setCategoryData(updatedCategoryData);
+      setMaxCount(maxItemCount);
       setError('');
     } catch (error) {
       console.error("Error fetching inventory stats:", error);
@@ -97,6 +131,7 @@ function Dashboard() {
       setLoading(false);
     }
   };
+  
 
   const StatCard = ({ icon: Icon, title, value, color }) => (
     <Card sx={{ height: '100%', bgcolor: 'white', boxShadow: 2 }}>
@@ -139,38 +174,29 @@ function Dashboard() {
         Dashboard
       </Typography>
 
-      {/* Stats Grid */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={4}>
           <StatCard 
             icon={ProductIcon}
+            title="Claimed"
+            value={stats.claimed}
+            color="stop"
+          />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <StatCard 
+            icon={TrendingIcon}
+            title="Unclaimed"
+            value={stats.unclaimed}
+            color="stop"
+          />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <StatCard 
+            icon={Windows}
             title="Total Items"
             value={stats.totalItems}
-            color="success"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            icon={LowStockIcon}
-            title="Low Stock"
-            value={stats.lowStock}
-            color="warning"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            icon={OutOfStockIcon}
-            title="Out of Stock"
-            value={stats.outOfStock}
-            color="error"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            icon={SupplierIcon}
-            title="Suppliers"
-            value={stats.suppliers}
-            color="info"
+            color="stop"
           />
         </Grid>
       </Grid>
@@ -211,6 +237,8 @@ function Dashboard() {
               <Box sx={{ width: '100%' }}>
                 {categoryData.map((category, index) => {
                   const Icon = category.icon;
+                  const progressValue = maxCount > 0 ? (category.count / maxCount) * 100 : 0;
+                  
                   return (
                     <Box key={index} sx={{ mb: 3 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -219,12 +247,12 @@ function Dashboard() {
                           {category.name}
                         </Typography>
                         <Typography variant="body2" sx={{ ml: 'auto' }}>
-                          {category.value}%
+                          {loading ? '...' : `${category.count} items`}
                         </Typography>
                       </Box>
                       <LinearProgress 
                         variant="determinate" 
-                        value={category.value} 
+                        value={progressValue} 
                         sx={{ height: 8, borderRadius: 4 }}
                       />
                     </Box>
@@ -250,31 +278,34 @@ function Dashboard() {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
             <TextField
               label="Full Name"
-              fullWidth
               value={userInfo.fullName}
               onChange={(e) => setUserInfo({ ...userInfo, fullName: e.target.value })}
+              fullWidth
             />
             <TextField
               label="Email"
-              fullWidth
               value={userInfo.email}
               onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+              fullWidth
             />
             <TextField
               label="Username"
-              fullWidth
               value={userInfo.username}
-              disabled
+              onChange={(e) => setUserInfo({ ...userInfo, username: e.target.value })}
+              fullWidth
             />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => {
-            updateUser({ ...user, ...userInfo });
-            setOpenDialog(false);
-          }}>
-            Save Changes
+          <Button
+            onClick={() => {
+              updateUser(userInfo);
+              setOpenDialog(false);
+            }}
+            variant="contained"
+          >
+            Save
           </Button>
         </DialogActions>
       </Dialog>
