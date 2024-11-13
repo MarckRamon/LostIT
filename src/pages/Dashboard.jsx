@@ -42,9 +42,9 @@ function Dashboard() {
     username: user?.username || '',
   });
   const [stats, setStats] = useState({
-    claimed: 0,
+    claimed: 5,
     totalItems: 0,
-    unclaimed: 0,
+    unclaimed: 3,
     stockValue: 0,
     unfulfilled: 0,
     received: 0,
@@ -69,15 +69,10 @@ function Dashboard() {
       setLoading(true);
   
       // Fetch items data from API
-      const [itemsResponse] = await Promise.all([
-        axiosInstance.get('/api/items/getAllItems')
-      ]);
+      const itemsResponse = await axiosInstance.get('/api/items/getAllItems');
       const items = itemsResponse.data;
   
-      // Debug: Log items data to ensure it's correct
-      console.log("Fetched items:", items);
-  
-      // Check if items have the expected structure
+      // Calculate claimed, unclaimed, total items, and stock value
       const claimed = items.filter(item => item.claimed === true).length;
       const totalItems = items.length;
       const unclaimed = items.filter(item => item.claimed === false).length;
@@ -207,14 +202,14 @@ function Dashboard() {
           <Card sx={{ bgcolor: 'primary.dark', color: 'white', height: '100%' }}>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 4 }}>
-                Value of Stock
+                Recently Added Item
               </Typography>
               <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
-                ${stats.stockValue.toLocaleString()}
+                One Piece Chapter 1015
               </Typography>
               
               <Typography variant="h6" sx={{ mb: 2 }}>
-                Stock Purchases
+                Manga
               </Typography>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography>Unfulfilled</Typography>
@@ -272,41 +267,16 @@ function Dashboard() {
       )}
 
       {/* Profile Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Profile</DialogTitle>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="xs">
+        <DialogTitle>Profile</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-            <TextField
-              label="Full Name"
-              value={userInfo.fullName}
-              onChange={(e) => setUserInfo({ ...userInfo, fullName: e.target.value })}
-              fullWidth
-            />
-            <TextField
-              label="Email"
-              value={userInfo.email}
-              onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-              fullWidth
-            />
-            <TextField
-              label="Username"
-              value={userInfo.username}
-              onChange={(e) => setUserInfo({ ...userInfo, username: e.target.value })}
-              fullWidth
-            />
-          </Box>
+          <TextField fullWidth label="Full Name" value={userInfo.fullName} onChange={(e) => setUserInfo({ ...userInfo, fullName: e.target.value })} />
+          <TextField fullWidth label="Email" value={userInfo.email} onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })} sx={{ mt: 2 }} />
+          <TextField fullWidth label="Username" value={userInfo.username} onChange={(e) => setUserInfo({ ...userInfo, username: e.target.value })} sx={{ mt: 2 }} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button
-            onClick={() => {
-              updateUser(userInfo);
-              setOpenDialog(false);
-            }}
-            variant="contained"
-          >
-            Save
-          </Button>
+          <Button onClick={() => updateUser(userInfo)} color="primary">Save</Button>
         </DialogActions>
       </Dialog>
     </Box>
