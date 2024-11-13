@@ -12,11 +12,25 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  IconButton,
+  LinearProgress,
 } from '@mui/material';
 import {
-  Inventory as InventoryIcon,
-  Category as CategoryIcon,
-  Warning as WarningIcon,
+  Devices as ElectronicsIcon,
+  Checkroom as ClothingIcon,
+  Watch as AccessoriesIcon,
+  MenuBook as BooksIcon,
+  Build as ToolsIcon,
+  ShoppingBag as BagsIcon,
+  SportsBasketball as SportsIcon,
+  Restaurant as FoodIcon,
+  Inventory as MiscIcon,
+  Inventory2 as ProductIcon,
+  Warning as LowStockIcon,
+  RemoveShoppingCart as OutOfStockIcon,
+  LocalShipping as SupplierIcon,
+  TrendingUp as TrendingIcon,
+  ArrowForward as ArrowIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosInstance';
@@ -31,11 +45,24 @@ function Dashboard() {
   });
   const [stats, setStats] = useState({
     totalItems: 0,
-    categories: 6, // Static as per your categories array length
     lowStock: 0,
+    outOfStock: 0,
+    suppliers: 5,
+    stockValue: 0,
+    unfulfilled: 0,
+    received: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Sample category data
+  const categoryData = [
+    { name: 'Electronics', value: 30, icon: ElectronicsIcon },
+    { name: 'Clothing', value: 25, icon: ClothingIcon },
+    { name: 'Accessories', value: 20, icon: AccessoriesIcon },
+    { name: 'Books', value: 15, icon: BooksIcon },
+    { name: 'Tools', value: 10, icon: ToolsIcon },
+  ];
 
   useEffect(() => {
     fetchInventoryStats();
@@ -49,13 +76,18 @@ function Dashboard() {
       
       // Calculate stats from items
       const totalItems = items.length;
-      // You can modify this logic based on what constitutes "low stock"
-      const lowStock = items.filter(item => item.status === "Unclaimed").length;
+      const lowStock = items.filter(item => item.quantity < 10).length;
+      const outOfStock = items.filter(item => item.quantity === 0).length;
+      const stockValue = items.reduce((total, item) => total + (item.price * item.quantity), 0);
 
       setStats({
         totalItems,
-        categories: 6, // Static value from your categories array
         lowStock,
+        outOfStock,
+        suppliers: 5,
+        stockValue,
+        unfulfilled: 4,
+        received: 1,
       });
       setError('');
     } catch (error) {
@@ -66,83 +98,138 @@ function Dashboard() {
     }
   };
 
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
-
-  const handleUpdateProfile = () => {
-    updateUser({ ...user, ...userInfo });
-    handleCloseDialog();
-  };
+  const StatCard = ({ icon: Icon, title, value, color }) => (
+    <Card sx={{ height: '100%', bgcolor: 'white', boxShadow: 2 }}>
+      <CardContent>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Box sx={{ 
+              bgcolor: `${color}.light`, 
+              borderRadius: '50%', 
+              width: 40, 
+              height: 40, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              mb: 1
+            }}>
+              <Icon sx={{ color: `${color}.main` }} />
+            </Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+              {loading ? '...' : value}
+            </Typography>
+            <Typography color="text.secondary" variant="body2">
+              {title}
+            </Typography>
+          </Box>
+          <IconButton size="small">
+            <ArrowIcon />
+          </IconButton>
+        </Box>
+      </CardContent>
+    </Card>
+  );
 
   return (
-    <Box>
+    <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
+        Inventory Management
+      </Typography>
+      <Typography variant="h6" sx={{ mb: 3 }}>
+        Dashboard
+      </Typography>
+
+      {/* Stats Grid */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard 
+            icon={ProductIcon}
+            title="Total Items"
+            value={stats.totalItems}
+            color="success"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard 
+            icon={LowStockIcon}
+            title="Low Stock"
+            value={stats.lowStock}
+            color="warning"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard 
+            icon={OutOfStockIcon}
+            title="Out of Stock"
+            value={stats.outOfStock}
+            color="error"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard 
+            icon={SupplierIcon}
+            title="Suppliers"
+            value={stats.suppliers}
+            color="info"
+          />
+        </Grid>
+      </Grid>
+
+      {/* Stock Value and Categories Section */}
       <Grid container spacing={3}>
-        {/* User Profile Card */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box>
-                <Typography variant="h5" gutterBottom>
-                  Welcome, {user?.fullName || user?.username}
-                </Typography>
-                <Typography color="text.secondary">
-                  {user?.email}
-                </Typography>
-              </Box>
-              <Button variant="outlined" onClick={handleOpenDialog}>
-                Edit Profile
-              </Button>
-            </Box>
-          </Paper>
-        </Grid>
-
-        {/* Statistics Cards */}
-        <Grid item xs={12} sm={4}>
-          <Card>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ bgcolor: 'primary.dark', color: 'white', height: '100%' }}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <InventoryIcon sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4">
-                    {loading ? '...' : stats.totalItems}
-                  </Typography>
-                  <Typography color="text.secondary">Total Items</Typography>
-                </Box>
+              <Typography variant="h6" sx={{ mb: 4 }}>
+                Value of Stock
+              </Typography>
+              <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
+                ${stats.stockValue.toLocaleString()}
+              </Typography>
+              
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Stock Purchases
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography>Unfulfilled</Typography>
+                <Typography>{stats.unfulfilled}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography>Received</Typography>
+                <Typography>{stats.received}</Typography>
               </Box>
             </CardContent>
           </Card>
         </Grid>
-
-        <Grid item xs={12} sm={4}>
+        
+        <Grid item xs={12} md={8}>
           <Card>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <CategoryIcon sx={{ fontSize: 40, color: 'success.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4">{stats.categories}</Typography>
-                  <Typography color="text.secondary">Categories</Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <WarningIcon sx={{ fontSize: 40, color: 'warning.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4">
-                    {loading ? '...' : stats.lowStock}
-                  </Typography>
-                  <Typography color="text.secondary">Unclaimed Items</Typography>
-                </Box>
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                Category Distribution
+              </Typography>
+              <Box sx={{ width: '100%' }}>
+                {categoryData.map((category, index) => {
+                  const Icon = category.icon;
+                  return (
+                    <Box key={index} sx={{ mb: 3 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Icon sx={{ mr: 1 }} />
+                        <Typography variant="body2">
+                          {category.name}
+                        </Typography>
+                        <Typography variant="body2" sx={{ ml: 'auto' }}>
+                          {category.value}%
+                        </Typography>
+                      </Box>
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={category.value} 
+                        sx={{ height: 8, borderRadius: 4 }}
+                      />
+                    </Box>
+                  );
+                })}
               </Box>
             </CardContent>
           </Card>
@@ -156,8 +243,8 @@ function Dashboard() {
         </Box>
       )}
 
-      {/* Edit Profile Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+      {/* Profile Dialog */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Edit Profile</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
@@ -182,8 +269,11 @@ function Dashboard() {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button variant="contained" onClick={handleUpdateProfile}>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => {
+            updateUser({ ...user, ...userInfo });
+            setOpenDialog(false);
+          }}>
             Save Changes
           </Button>
         </DialogActions>
