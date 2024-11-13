@@ -29,7 +29,7 @@ const initialFormState = {
   description: '',
   location: '',
   status: 'Unclaimed',
-  dateAdded: '',
+  date: '',
 };
 
 const initialLocationState = {
@@ -83,7 +83,7 @@ function Inventory() {
         locationId: item.locationId || (item.location && item.location.id),
         description: item.description,
         status: item.status,
-        dateAdded: item.dateAdded || '',
+        date: item.date || '',
         category: item.category,
         location: item.location
       }));
@@ -143,7 +143,7 @@ function Inventory() {
         description: item.description || '',
         location: item.locationId || item.location?.id || '',
         status: item.status || 'Unclaimed',
-        dateAdded: item.dateAdded || '',
+        date: item.date || '',
       });
       setEditingId(item.itemId);
     } else {
@@ -174,7 +174,7 @@ function Inventory() {
         itemName: formData.itemName.trim(),
         description: formData.description.trim(),
         status: formData.status,
-        dateAdded: formData.dateAdded,
+        date: formData.date,
         category: { categoryId: parseInt(formData.category) },
         location: { locationId: parseInt(formData.location) }
       };
@@ -206,7 +206,7 @@ function Inventory() {
         itemName: formData.itemName.trim(),
         description: formData.description.trim(),
         status: formData.status,
-        dateAdded: formData.dateAdded,
+        date: formData.date,
         category: { categoryId: parseInt(formData.category) },
         location: { locationId: parseInt(formData.location) }
       };
@@ -369,7 +369,7 @@ function Inventory() {
                   <TableCell>{getLocationName(item)}</TableCell>
                   <TableCell>{item.description || 'N/A'}</TableCell>
                   <TableCell>{item.status || 'N/A'}</TableCell>
-                  <TableCell>{item.dateAdded || 'N/A'}</TableCell>
+                  <TableCell>{item.date || 'N/A'}</TableCell>
                   <TableCell>
                     <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
                       <EditIcon />
@@ -490,8 +490,8 @@ function Inventory() {
           <TextField
             label="Date Added"
             type="date"
-            value={formData.dateAdded}
-            onChange={(e) => setFormData({ ...formData, dateAdded: e.target.value })}
+            value={formData.date}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
