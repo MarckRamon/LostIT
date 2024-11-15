@@ -61,7 +61,7 @@ function Layout({ children }) {
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Toolbar>
         <Typography variant="h6" noWrap component="div">
-          Inventory MS
+          LostIT
         </Typography>
       </Toolbar>
       <Divider />

@@ -49,11 +49,15 @@ function Inventory() {
   const [selectedStatus, setSelectedStatus] = useState(''); 
 
   const handleCategoryChange = (event) => {
-    setSelectedCategory(event.target.value ? parseInt(event.target.value) : null);
+   const value = event.target.value;
+   console.log('Selected Category value: ', value);
+   setSelectedCategory(value === '' ? null : value);
   };
   
   const handleLocationChange = (event) => {
-    setSelectedLocation(event.target.value ? parseInt(event.target.value) : null);
+    const value = event.target.value;
+    console.log('Selected Location value: ', value);
+    setSelectedLocation(value === '' ? null : value);
   };
   
 
@@ -80,8 +84,8 @@ function Inventory() {
       const transformedItems = response.data.map(item => ({
         itemId: item.itemId || item.id,
         itemName: item.itemName,
-        categoryId: item.categoryId || (item.category && item.category.id),
-        locationId: item.locationId || (item.location && item.location.id),
+        categoryId: item.categoryId || (item.category && item.category.id) || (item.category && item.category.categoryId),
+        locationId: item.locationId || (item.location && item.location.id) || (item.location && item.location.locationId),
         description: item.description,
         status: item.status,
         date: item.date || '',
@@ -216,11 +220,18 @@ function Inventory() {
 
   
   const filteredItems = items.filter(item => {
-    const matchesSearchTerm = item.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              item.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearchTerm = 
+      item.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase());
   
-    const matchesCategory = selectedCategory !== null ? item.categoryId === selectedCategory : true;
-    const matchesLocation = selectedLocation !== null ? item.locationId === selectedLocation : true;
+    const matchesCategory = selectedCategory === null || selectedCategory === '' 
+    ? true
+    : Number(item.categoryId) === Number(selectedCategory);
+
+    const matchesLocation = selectedLocation === null || selectedLocation === ''
+    ? true
+    : Number(item.locationId) === Number(selectedLocation);
+
     const matchesStatus = selectedStatus ? item.status === selectedStatus : true;
   
     return matchesSearchTerm && matchesCategory && matchesLocation && matchesStatus;
@@ -252,7 +263,7 @@ function Inventory() {
         <FormControl sx={{ minWidth: 120, mx: 1 }}>
           <InputLabel>Category</InputLabel>
           <Select
-            value={selectedCategory || ''} 
+            value={selectedCategory || null} 
             onChange={handleCategoryChange}
             label="Category"
           >
@@ -260,7 +271,10 @@ function Inventory() {
               <em>All</em>
             </MenuItem>
             {categories.map((category) => (
-              <MenuItem key={category.id || category.categoryId} value={category.id || category.categoryId}>
+              <MenuItem 
+              key={category.id || category.categoryId} 
+              value={category.id || category.categoryId}
+              >
                 {category.name || category.categoryName}
               </MenuItem>
             ))}
@@ -270,7 +284,7 @@ function Inventory() {
         <FormControl sx={{ minWidth: 120, mx: 1 }}>
           <InputLabel>Location</InputLabel>
           <Select
-            value={selectedLocation || ''} 
+            value={selectedLocation || null} 
             onChange={handleLocationChange}
             label="Location"
           >
@@ -278,7 +292,10 @@ function Inventory() {
               <em>All</em>
             </MenuItem>
             {locations.map((location) => (
-              <MenuItem key={location.id || location.locationId} value={location.id || location.locationId}>
+              <MenuItem 
+                key={location.id || location.locationId} 
+                value={location.id || location.locationId}
+              >
                 {location.name || `${location.locationBuilding} - ${location.locationFloor}` || location.locationName}
               </MenuItem>
             ))}
