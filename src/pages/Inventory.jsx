@@ -19,6 +19,7 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Menu,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import axiosInstance from '../axiosInstance';
@@ -56,6 +57,23 @@ function Inventory() {
   const [successMessage, setSuccessMessage] = useState('');
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null); 
+  const [selectedLocation, setSelectedLocation] = useState(null); 
+  const [selectedStatus, setSelectedStatus] = useState(''); 
+
+  const handleCategoryChange = (event) => {
+   const value = event.target.value;
+   console.log('Selected Category value: ', value);
+   setSelectedCategory(value === '' ? null : value);
+  };
+  
+  const handleLocationChange = (event) => {
+    const value = event.target.value;
+    console.log('Selected Location value: ', value);
+    setSelectedLocation(value === '' ? null : value);
+  };
+  
+
 
   useEffect(() => {
     fetchItems();
@@ -79,8 +97,8 @@ function Inventory() {
       const transformedItems = response.data.map(item => ({
         itemId: item.itemId || item.id,
         itemName: item.itemName,
-        categoryId: item.categoryId || (item.category && item.category.id),
-        locationId: item.locationId || (item.location && item.location.id),
+        categoryId: item.categoryId || (item.category && item.category.id) || (item.category && item.category.categoryId),
+        locationId: item.locationId || (item.location && item.location.id) || (item.location && item.location.locationId),
         description: item.description,
         status: item.status,
         date: item.date || '',
@@ -241,10 +259,24 @@ function Inventory() {
     }
   };
 
-  const filteredItems = items.filter(item =>
-    item.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  
+  const filteredItems = items.filter(item => {
+    const matchesSearchTerm = 
+      item.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase());
+  
+    const matchesCategory = selectedCategory === null || selectedCategory === '' 
+    ? true
+    : Number(item.categoryId) === Number(selectedCategory);
+
+    const matchesLocation = selectedLocation === null || selectedLocation === ''
+    ? true
+    : Number(item.locationId) === Number(selectedLocation);
+
+    const matchesStatus = selectedStatus ? item.status === selectedStatus : true;
+  
+    return matchesSearchTerm && matchesCategory && matchesLocation && matchesStatus;
+  });
 
   const handleOpenLocationDialog = () => {
     setLocationData(initialLocationState);
@@ -322,13 +354,68 @@ function Inventory() {
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         <TextField
-          placeholder="Search items..."
+          placeholder="Search items"
           variant="outlined"
           size="small"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{ width: 300 }}
         />
+        <FormControl sx={{ minWidth: 120, mx: 1 }}>
+          <InputLabel>Category</InputLabel>
+          <Select
+            value={selectedCategory || null} 
+            onChange={handleCategoryChange}
+            label="Category"
+          >
+            <MenuItem value="">
+              <em>All</em>
+            </MenuItem>
+            {categories.map((category) => (
+              <MenuItem 
+              key={category.id || category.categoryId} 
+              value={category.id || category.categoryId}
+              >
+                {category.name || category.categoryName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: 120, mx: 1 }}>
+          <InputLabel>Location</InputLabel>
+          <Select
+            value={selectedLocation || null} 
+            onChange={handleLocationChange}
+            label="Location"
+          >
+            <MenuItem value="">
+              <em>All</em>
+            </MenuItem>
+            {locations.map((location) => (
+              <MenuItem 
+                key={location.id || location.locationId} 
+                value={location.id || location.locationId}
+              >
+                {location.name || `${location.locationBuilding} - ${location.locationFloor}` || location.locationName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl sx={{ minWidth: 120, mx: 1}}>
+          <InputLabel>Status</InputLabel>
+          <Select
+            value = {selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            label = "Status"
+          >
+            <MenuItem value="">
+              <em>All</em>
+            </MenuItem>
+            <MenuItem value="Unclaimed">Unclaimed</MenuItem>
+            <MenuItem value="Claimed">Claimed</MenuItem>
+          </Select>
+        </FormControl>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -356,7 +443,7 @@ function Inventory() {
           <TableBody>
             {filteredItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={8} align="center">
                   {loading ? 'Loading...' : 'No items found'}
                 </TableCell>
               </TableRow>
@@ -371,7 +458,7 @@ function Inventory() {
                   <TableCell>{item.status || 'N/A'}</TableCell>
                   <TableCell>{item.date || 'N/A'}</TableCell>
                   <TableCell>
-                    <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
+                      <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
                       <EditIcon />
                     </IconButton>
                     <IconButton onClick={() => handleDelete(item.itemId)} disabled={loading}>
