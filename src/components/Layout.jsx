@@ -60,7 +60,18 @@ function Layout({ children }) {
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Toolbar>
-        <Typography variant="h6" noWrap component="div">
+        <Typography 
+          variant="h6" 
+          noWrap 
+          component="div" 
+          onClick={() => navigate('/')}
+          sx={{ 
+            cursor: 'pointer',
+            '&:hover': {
+              opacity: 0.8
+            }
+          }}
+        >
           LostIT
         </Typography>
       </Toolbar>
