@@ -163,11 +163,9 @@ function Dashboard() {
   return (
     <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
-        Inventory Management
+        Dashboard Analytics
       </Typography>
-      <Typography variant="h6" sx={{ mb: 3 }}>
-        Dashboard
-      </Typography>
+    
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={4}>
