@@ -10,7 +10,6 @@ import {
   IconButton,
   Avatar,
   Stack,
-  Fade,
   Stepper,
   Step,
   StepLabel,
@@ -39,7 +38,6 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [activeStep, setActiveStep] = useState(0);
-  const [showRegisterForm, setShowRegisterForm] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const navigate = useNavigate();
 
@@ -190,238 +188,193 @@ const Register = () => {
       />
 
       <Container maxWidth="sm" sx={{ height: '100vh', position: 'relative' }}>
-        {/* Time and Date Display */}
-        <Fade in={!showRegisterForm} timeout={800}>
-          <Stack
-            spacing={1}
-            alignItems="center"
+        <Stack
+          spacing={3}
+          alignItems="center"
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '100%',
+          }}
+        >
+          <Avatar
             sx={{
-              position: 'absolute',
-              top: '40%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '100%',
-              display: showRegisterForm ? 'none' : 'flex',
+              width: 90,
+              height: 90,
+              bgcolor: 'transparent',
+              border: '2px solid white',
+              mb: 2,
             }}
           >
-            <Typography
-              variant="h1"
-              sx={{
-                fontSize: { xs: '4rem', sm: '6rem' },
-                fontWeight: 600,
-                color: 'white',
-                textShadow: '0 0 10px rgba(0,0,0,0.3)',
-                fontFamily: 'Segoe UI Light, sans-serif',
-              }}
-            >
-              {formatTime()}
-            </Typography>
-            <Typography
-              variant="h4"
-              sx={{
-                color: 'white',
-                fontWeight: 300,
-                textShadow: '0 0 10px rgba(0,0,0,0.3)',
-                fontFamily: 'Segoe UI, sans-serif',
-              }}
-            >
-              {formatDate()}
-            </Typography>
-          </Stack>
-        </Fade>
+            <Person sx={{ fontSize: 48, color: 'white' }} />
+          </Avatar>
 
-        {/* Register Form */}
-        <Fade in={showRegisterForm} timeout={800}>
-          <Stack
-            spacing={3}
-            alignItems="center"
+          <Typography
+            variant="h5"
             sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '100%',
-              display: showRegisterForm ? 'flex' : 'none',
+              color: 'white',
+              fontWeight: 300,
+              fontFamily: 'Segoe UI, sans-serif',
+              mb: 3,
             }}
           >
-            <Avatar
-              sx={{
-                width: 90,
-                height: 90,
-                bgcolor: 'transparent',
-                border: '2px solid white',
-                mb: 2,
-              }}
-            >
-              <Person sx={{ fontSize: 48, color: 'white' }} />
-            </Avatar>
+            Create Account
+          </Typography>
 
-            <Typography
-              variant="h5"
-              sx={{
+          <Stepper 
+            activeStep={activeStep} 
+            alternativeLabel
+            sx={{
+              width: '100%',
+              mb: 3,
+              '& .MuiStepLabel-label': {
                 color: 'white',
-                fontWeight: 300,
-                fontFamily: 'Segoe UI, sans-serif',
-                mb: 3,
-              }}
-            >
-              Create Account
-            </Typography>
-
-            <Stepper 
-              activeStep={activeStep} 
-              alternativeLabel
-              sx={{
-                width: '100%',
-                mb: 3,
-                '& .MuiStepLabel-label': {
+              },
+              '& .MuiStepIcon-root': {
+                color: 'rgba(255, 255, 255, 0.3)',
+                '&.Mui-active': {
                   color: 'white',
                 },
-                '& .MuiStepIcon-root': {
-                  color: 'rgba(255, 255, 255, 0.3)',
-                  '&.Mui-active': {
-                    color: 'white',
-                  },
-                  '&.Mui-completed': {
-                    color: 'rgba(255, 255, 255, 0.7)',
-                  },
+                '&.Mui-completed': {
+                  color: 'rgba(255, 255, 255, 0.7)',
                 },
+              },
+            }}
+          >
+            {steps.map((step) => (
+              <Step key={step.label}>
+                <StepLabel>{step.label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+
+          {error && (
+            <Typography 
+              color="error" 
+              sx={{ 
+                bgcolor: 'rgba(255,255,255,0.1)',
+                px: 2,
+                py: 1,
+                borderRadius: 1,
               }}
             >
-              {steps.map((step) => (
-                <Step key={step.label}>
-                  <StepLabel>{step.label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
+              {error}
+            </Typography>
+          )}
 
-            {error && (
-              <Typography 
-                color="error" 
-                sx={{ 
-                  bgcolor: 'rgba(255,255,255,0.1)',
-                  px: 2,
-                  py: 1,
-                  borderRadius: 1,
-                }}
-              >
-                {error}
-              </Typography>
-            )}
-
-            <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 400 }}>
-              <Stack spacing={3}>
-                {steps[activeStep].fields.map((field) => (
-                  <TextField
-                    key={field.name}
-                    fullWidth
-                    label={field.label}
-                    type={field.type}
-                    value={formData[field.name]}
-                    onChange={(e) => 
-                      setFormData({ ...formData, [field.name]: e.target.value })
-                    }
-                    required
-                    variant="standard"
-                    InputProps={{
-                      startAdornment: field.icon,
-                    }}
-                    sx={{
-                      '& .MuiInput-root': {
-                        color: 'white',
-                        '&:before': {
-                          borderColor: 'rgba(255, 255, 255, 0.3)',
-                        },
-                        '&:hover:not(.Mui-disabled):before': {
-                          borderColor: 'rgba(255, 255, 255, 0.5)',
-                        },
-                      },
-                      '& .MuiInputLabel-root': {
-                        color: 'rgba(255, 255, 255, 0.7)',
-                      },
-                      '& .MuiSvgIcon-root': {
-                        color: 'rgba(255, 255, 255, 0.7)',
-                        mr: 1,
-                      },
-                    }}
-                  />
-                ))}
-
-                <Stack direction="row" spacing={2}>
-                  {activeStep > 0 && (
-                    <Button
-                      onClick={handleBack}
-                      variant="contained"
-                      startIcon={<NavigateBefore />}
-                      sx={{
-                        flex: 1,
-                        bgcolor: 'rgba(255, 255, 255, 0.1)',
-                        color: 'white',
-                        '&:hover': {
-                          bgcolor: 'rgba(255, 255, 255, 0.2)',
-                        },
-                      }}
-                    >
-                      Back
-                    </Button>
-                  )}
-                  
-                  {activeStep === steps.length - 1 ? (
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      fullWidth={activeStep === 0}
-                      endIcon={<NavigateNext />}
-                      sx={{
-                        flex: 1,
-                        bgcolor: 'rgba(255, 255, 255, 0.2)',
-                        color: 'white',
-                        '&:hover': {
-                          bgcolor: 'rgba(255, 255, 255, 0.3)',
-                        },
-                      }}
-                    >
-                      Create Account
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleNext}
-                      variant="contained"
-                      fullWidth={activeStep === 0}
-                      endIcon={<NavigateNext />}
-                      sx={{
-                        flex: 1,
-                        bgcolor: 'rgba(255, 255, 255, 0.2)',
-                        color: 'white',
-                        '&:hover': {
-                          bgcolor: 'rgba(255, 255, 255, 0.3)',
-                        },
-                      }}
-                    >
-                      Next
-                    </Button>
-                  )}
-                </Stack>
-
-                <Button
-                  component={RouterLink}
-                  to="/login"
+          <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 400 }}>
+            <Stack spacing={3}>
+              {steps[activeStep].fields.map((field) => (
+                <TextField
+                  key={field.name}
+                  fullWidth
+                  label={field.label}
+                  type={field.type}
+                  value={formData[field.name]}
+                  onChange={(e) => 
+                    setFormData({ ...formData, [field.name]: e.target.value })
+                  }
+                  required
+                  variant="standard"
+                  InputProps={{
+                    startAdornment: field.icon,
+                  }}
                   sx={{
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    textDecoration: 'none',
-                    '&:hover': {
+                    '& .MuiInput-root': {
                       color: 'white',
+                      '&:before': {
+                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                      },
+                      '&:hover:not(.Mui-disabled):before': {
+                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: 'rgba(255, 255, 255, 0.7)',
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      mr: 1,
                     },
                   }}
-                >
-                  Already have an account? Sign in
-                </Button>
-              </Stack>
-            </form>
-          </Stack>
-        </Fade>
+                />
+              ))}
 
-        {/* Quick Access Icons */}
+              <Stack direction="row" spacing={2}>
+                {activeStep > 0 && (
+                  <Button
+                    onClick={handleBack}
+                    variant="contained"
+                    startIcon={<NavigateBefore />}
+                    sx={{
+                      flex: 1,
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      },
+                    }}
+                  >
+                    Back
+                  </Button>
+                )}
+                
+                {activeStep === steps.length - 1 ? (
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth={activeStep === 0}
+                    endIcon={<NavigateNext />}
+                    sx={{
+                      flex: 1,
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.3)',
+                      },
+                    }}
+                  >
+                    Create Account
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleNext}
+                    variant="contained"
+                    fullWidth={activeStep === 0}
+                    endIcon={<NavigateNext />}
+                    sx={{
+                      flex: 1,
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.3)',
+                      },
+                    }}
+                  >
+                    Next
+                  </Button>
+                )}
+              </Stack>
+
+              <Button
+                component={RouterLink}
+                to="/login"
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    color: 'white',
+                  },
+                }}
+              >
+                Already have an account? Sign in
+              </Button>
+            </Stack>
+          </form>
+        </Stack>
+        
         <Stack
           direction="row"
           spacing={2}
@@ -441,28 +394,6 @@ const Register = () => {
             <Battery90 />
           </IconButton>
         </Stack>
-
-        {/* Click to unlock or press space */}
-        {!showRegisterForm && (
-          <Typography
-            onClick={() => setShowRegisterForm(true)}
-            sx={{
-              position: 'absolute',
-              bottom: '15%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '1.1rem',
-              fontWeight: 300,
-              textAlign: 'center',
-              width: '100%',
-              fontFamily: 'Segoe UI, sans-serif',
-            }}
-          >
-            Click to unlock or press space
-          </Typography>
-        )}
       </Container>
     </Box>
   );
