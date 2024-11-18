@@ -12,7 +12,8 @@ body {
     height: 100vh;
     overflow: hidden;
     position: relative;
-    background: #000; /* Fallback background */
+    background: #000;
+    /* Fallback background */
     color: white;
 }
 
@@ -42,13 +43,15 @@ body {
 
 /* Login Container */
 .login-container {
-    position: relative;
-    z-index: 1;
+    position: fixed; /* Change from relative to fixed */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 100%;
+    overflow: hidden; /* Prevent scrolling if content exceeds */
 }
 
 /* Login Box */
@@ -61,6 +64,7 @@ body {
     max-width: 400px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     animation: fadeIn 1s ease-out;
+    
 }
 
 /* Fade-in Animation */
@@ -69,6 +73,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -202,4 +207,14 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
+}
+
+html,body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    background: #000;
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
+import './Login.css';
 import {
   Box,
   Container,
@@ -384,15 +385,6 @@ const Register = () => {
             right: 24,
           }}
         >
-          <IconButton sx={{ color: 'white' }}>
-            <AccessibilityNew />
-          </IconButton>
-          <IconButton sx={{ color: 'white' }}>
-            <Wifi />
-          </IconButton>
-          <IconButton sx={{ color: 'white' }}>
-            <Battery90 />
-          </IconButton>
         </Stack>
       </Container>
     </Box>
