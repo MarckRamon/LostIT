@@ -117,7 +117,7 @@ function Layout({ children }) {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={() => { handleClose(); navigate('/'); }}>
+              <MenuItem onClick={() => { handleClose(); navigate('/edit-profile'); }}>
                 <ListItemIcon>
                   <AccountCircleIcon fontSize="small" />
                 </ListItemIcon>
