@@ -1,9 +1,34 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import './Login.css';
+import {
+  Box,
+  Container,
+  TextField,
+  Button,
+  Typography,
+  IconButton,
+  Avatar,
+  Stack,
+  Fade,
+  Stepper,
+  Step,
+  StepLabel,
+} from '@mui/material';
+import {
+  Person,
+  Wifi,
+  VolumeUp,
+  Battery90,
+  NavigateNext,
+  NavigateBefore,
+  AccessibilityNew,
+  Email,
+  Phone,
+  Lock,
+} from '@mui/icons-material';
 
-function Register() {
+const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -13,8 +38,18 @@ function Register() {
     phoneNumber: '',
   });
   const [error, setError] = useState('');
+  const [activeStep, setActiveStep] = useState(0);
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const navigate = useNavigate();
-  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,125 +75,397 @@ function Register() {
     }
   };
 
-  const toggleMusic = () => {
-    const audio = document.getElementById('bgMusic');
-    if (isPlaying) audio.pause();
-    else audio.play();
-    setIsPlaying(!isPlaying);
+  const handleNext = () => {
+    setActiveStep((prevStep) => prevStep + 1);
   };
 
-  const toggleVideo = () => {
-    const video = document.getElementById('bgVideo');
-    if (video.paused) video.play();
-    else video.pause();
+  const handleBack = () => {
+    setActiveStep((prevStep) => prevStep - 1);
   };
+
+  const formatTime = () => {
+    return currentTime.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const formatDate = () => {
+    return currentTime.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const steps = [
+    {
+      label: 'Personal Info',
+      fields: [
+        {
+          name: 'fullName',
+          label: 'Full Name',
+          type: 'text',
+          icon: <Person />,
+        },
+        {
+          name: 'email',
+          label: 'Email',
+          type: 'email',
+          icon: <Email />,
+        },
+      ],
+    },
+    {
+      label: 'Account Details',
+      fields: [
+        {
+          name: 'username',
+          label: 'Username',
+          type: 'text',
+          icon: <Person />,
+        },
+        {
+          name: 'phoneNumber',
+          label: 'Phone Number',
+          type: 'tel',
+          icon: <Phone />,
+        },
+      ],
+    },
+    {
+      label: 'Security',
+      fields: [
+        {
+          name: 'password',
+          label: 'Password',
+          type: 'password',
+          icon: <Lock />,
+        },
+        {
+          name: 'confirmPassword',
+          label: 'Confirm Password',
+          type: 'password',
+          icon: <Lock />,
+        },
+      ],
+    },
+  ];
 
   return (
-    <div className="login-container">
-      <video className="video-background" autoPlay muted loop id="bgVideo">
+    <Box 
+      sx={{ 
+        position: 'relative', 
+        minHeight: '100vh',
+        bgcolor: '#000',
+        overflow: 'hidden',
+        cursor: 'default',
+      }}
+    >
+      {/* Background Video */}
+      <video
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+        }}
+        autoPlay
+        muted
+        loop
+        id="bgVideo"
+      >
         <source src="/ph.mp4" type="video/mp4" />
       </video>
-      <div className="background-overlay"></div>
 
-      <div className="login-box">
-        <div className="logo">Register</div>
-        
-        {error && <div className="error-message">{error}</div>}
+      {/* Blur Overlay */}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          bgcolor: 'rgba(0, 0, 0, 0.4)',
+          backdropFilter: 'blur(8px)',
+        }}
+      />
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="fullName">Full Name</label>
-            <input
-              type="text"
-              id="fullName"
-              value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              placeholder="Enter your full name"
-              required
-            />
-          </div>
+      <Container maxWidth="sm" sx={{ height: '100vh', position: 'relative' }}>
+        {/* Time and Date Display */}
+        <Fade in={!showRegisterForm} timeout={800}>
+          <Stack
+            spacing={1}
+            alignItems="center"
+            sx={{
+              position: 'absolute',
+              top: '40%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              display: showRegisterForm ? 'none' : 'flex',
+            }}
+          >
+            <Typography
+              variant="h1"
+              sx={{
+                fontSize: { xs: '4rem', sm: '6rem' },
+                fontWeight: 600,
+                color: 'white',
+                textShadow: '0 0 10px rgba(0,0,0,0.3)',
+                fontFamily: 'Segoe UI Light, sans-serif',
+              }}
+            >
+              {formatTime()}
+            </Typography>
+            <Typography
+              variant="h4"
+              sx={{
+                color: 'white',
+                fontWeight: 300,
+                textShadow: '0 0 10px rgba(0,0,0,0.3)',
+                fontFamily: 'Segoe UI, sans-serif',
+              }}
+            >
+              {formatDate()}
+            </Typography>
+          </Stack>
+        </Fade>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="Enter your email"
-              required
-            />
-          </div>
+        {/* Register Form */}
+        <Fade in={showRegisterForm} timeout={800}>
+          <Stack
+            spacing={3}
+            alignItems="center"
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              display: showRegisterForm ? 'flex' : 'none',
+            }}
+          >
+            <Avatar
+              sx={{
+                width: 90,
+                height: 90,
+                bgcolor: 'transparent',
+                border: '2px solid white',
+                mb: 2,
+              }}
+            >
+              <Person sx={{ fontSize: 48, color: 'white' }} />
+            </Avatar>
 
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              placeholder="Choose a username"
-              required
-            />
-          </div>
+            <Typography
+              variant="h5"
+              sx={{
+                color: 'white',
+                fontWeight: 300,
+                fontFamily: 'Segoe UI, sans-serif',
+                mb: 3,
+              }}
+            >
+              Create Account
+            </Typography>
 
-          <div className="form-group">
-            <label htmlFor="phoneNumber">Phone Number</label>
-            <input
-              type="tel"
-              id="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-              placeholder="Enter your phone number"
-              required
-            />
-          </div>
+            <Stepper 
+              activeStep={activeStep} 
+              alternativeLabel
+              sx={{
+                width: '100%',
+                mb: 3,
+                '& .MuiStepLabel-label': {
+                  color: 'white',
+                },
+                '& .MuiStepIcon-root': {
+                  color: 'rgba(255, 255, 255, 0.3)',
+                  '&.Mui-active': {
+                    color: 'white',
+                  },
+                  '&.Mui-completed': {
+                    color: 'rgba(255, 255, 255, 0.7)',
+                  },
+                },
+              }}
+            >
+              {steps.map((step) => (
+                <Step key={step.label}>
+                  <StepLabel>{step.label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="Choose a password"
-              required
-            />
-          </div>
+            {error && (
+              <Typography 
+                color="error" 
+                sx={{ 
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  px: 2,
+                  py: 1,
+                  borderRadius: 1,
+                }}
+              >
+                {error}
+              </Typography>
+            )}
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-              placeholder="Confirm your password"
-              required
-            />
-          </div>
+            <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 400 }}>
+              <Stack spacing={3}>
+                {steps[activeStep].fields.map((field) => (
+                  <TextField
+                    key={field.name}
+                    fullWidth
+                    label={field.label}
+                    type={field.type}
+                    value={formData[field.name]}
+                    onChange={(e) => 
+                      setFormData({ ...formData, [field.name]: e.target.value })
+                    }
+                    required
+                    variant="standard"
+                    InputProps={{
+                      startAdornment: field.icon,
+                    }}
+                    sx={{
+                      '& .MuiInput-root': {
+                        color: 'white',
+                        '&:before': {
+                          borderColor: 'rgba(255, 255, 255, 0.3)',
+                        },
+                        '&:hover:not(.Mui-disabled):before': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiSvgIcon-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        mr: 1,
+                      },
+                    }}
+                  />
+                ))}
 
-          <button type="submit" className="login-button">Register</button>
+                <Stack direction="row" spacing={2}>
+                  {activeStep > 0 && (
+                    <Button
+                      onClick={handleBack}
+                      variant="contained"
+                      startIcon={<NavigateBefore />}
+                      sx={{
+                        flex: 1,
+                        bgcolor: 'rgba(255, 255, 255, 0.1)',
+                        color: 'white',
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 255, 255, 0.2)',
+                        },
+                      }}
+                    >
+                      Back
+                    </Button>
+                  )}
+                  
+                  {activeStep === steps.length - 1 ? (
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      fullWidth={activeStep === 0}
+                      endIcon={<NavigateNext />}
+                      sx={{
+                        flex: 1,
+                        bgcolor: 'rgba(255, 255, 255, 0.2)',
+                        color: 'white',
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 255, 255, 0.3)',
+                        },
+                      }}
+                    >
+                      Create Account
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleNext}
+                      variant="contained"
+                      fullWidth={activeStep === 0}
+                      endIcon={<NavigateNext />}
+                      sx={{
+                        flex: 1,
+                        bgcolor: 'rgba(255, 255, 255, 0.2)',
+                        color: 'white',
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 255, 255, 0.3)',
+                        },
+                      }}
+                    >
+                      Next
+                    </Button>
+                  )}
+                </Stack>
 
-          <div className="links">
-            <Link to="/login">Already have an account? Login</Link>
-          </div>
-        </form>
-      </div>
+                <Button
+                  component={RouterLink}
+                  to="/login"
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'white',
+                    },
+                  }}
+                >
+                  Already have an account? Sign in
+                </Button>
+              </Stack>
+            </form>
+          </Stack>
+        </Fade>
 
-      <div className="audio-controls" onClick={toggleMusic} title="Toggle music">
-        🎵
-      </div>
+        {/* Quick Access Icons */}
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            position: 'absolute',
+            bottom: 24,
+            right: 24,
+          }}
+        >
+          <IconButton sx={{ color: 'white' }}>
+            <AccessibilityNew />
+          </IconButton>
+          <IconButton sx={{ color: 'white' }}>
+            <Wifi />
+          </IconButton>
+          <IconButton sx={{ color: 'white' }}>
+            <Battery90 />
+          </IconButton>
+        </Stack>
 
-      <div className="video-controls" onClick={toggleVideo} title="Toggle video">
-        🎬
-      </div>
-
-      <audio id="bgMusic" loop>
-        <source src="/you.mp3" type="audio/mp3" />
-      </audio>
-    </div>
+        {/* Click to unlock or press space */}
+        {!showRegisterForm && (
+          <Typography
+            onClick={() => setShowRegisterForm(true)}
+            sx={{
+              position: 'absolute',
+              bottom: '15%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '1.1rem',
+              fontWeight: 300,
+              textAlign: 'center',
+              width: '100%',
+              fontFamily: 'Segoe UI, sans-serif',
+            }}
+          >
+            Click to unlock or press space
+          </Typography>
+        )}
+      </Container>
+    </Box>
   );
-}
+};
 
 export default Register;
