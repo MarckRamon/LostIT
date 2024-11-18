@@ -12,11 +12,23 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  IconButton,
+  LinearProgress,
 } from '@mui/material';
 import {
-  Inventory as InventoryIcon,
-  Category as CategoryIcon,
-  Warning as WarningIcon,
+  Devices as ElectronicsIcon,
+  Checkroom as ClothingIcon,
+  Watch as AccessoriesIcon,
+  MenuBook as BooksIcon,
+  Build as ToolsIcon,
+  ShoppingBag as BagsIcon,
+  SportsBasketball as SportsIcon,
+  Restaurant as FoodIcon,
+  Inventory as MiscIcon,
+  TaskAltOutlined as ProductIcon,
+  Cancel as TrendingIcon,
+  ArrowForward as ArrowIcon,
+  Window as Windows,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosInstance';
@@ -30,12 +42,23 @@ function Dashboard() {
     username: user?.username || '',
   });
   const [stats, setStats] = useState({
+    claimed: 5,
     totalItems: 0,
-    categories: 6, // Static as per your categories array length
-    lowStock: 0,
+    unclaimed: 3,
+    stockValue: 0,
+    unfulfilled: 0,
+    received: 0,
   });
+  const [categoryData, setCategoryData] = useState([
+    { name: 'Electronics', count: 0, icon: ElectronicsIcon },
+    { name: 'Clothing', count: 0, icon: ClothingIcon },
+    { name: 'Accessories', count: 0, icon: AccessoriesIcon },
+    { name: 'Books', count: 0, icon: BooksIcon },
+    { name: 'Tools', count: 0, icon: ToolsIcon },
+  ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [maxCount, setMaxCount] = useState(0);
 
   useEffect(() => {
     fetchInventoryStats();
@@ -44,19 +67,57 @@ function Dashboard() {
   const fetchInventoryStats = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/api/items/getAllItems');
-      const items = response.data;
-      
-      // Calculate stats from items
+  
+      // Fetch items data from API
+      const itemsResponse = await axiosInstance.get('/api/items/getAllItems');
+      const items = itemsResponse.data;
+  
+      // Calculate claimed, unclaimed, total items, and stock value
+      const claimed = items.filter(item => item.claimed === true).length;
       const totalItems = items.length;
-      // You can modify this logic based on what constitutes "low stock"
-      const lowStock = items.filter(item => item.status === "Unclaimed").length;
-
+      const unclaimed = items.filter(item => item.claimed === false).length;
+      const stockValue = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+  
+      // Update stats with the calculated values
       setStats({
+        claimed,
         totalItems,
-        categories: 6, // Static value from your categories array
-        lowStock,
+        unclaimed,
+        stockValue,
+        unfulfilled: 4, // Assuming static values for these two
+        received: 1,
       });
+  
+      const categoryCounts = {
+        'Electronics': 0,
+        'Clothing': 0,
+        'Accessories': 0,
+        'Books': 0,
+        'Tools': 0
+      };
+  
+      let maxItemCount = 0;
+  
+      // Count items per category
+      items.forEach(item => {
+        const categoryName = item.category ? 
+          (item.category.categoryName || item.category.name) : 
+          'Uncategorized';
+        
+        if (categoryCounts.hasOwnProperty(categoryName)) {
+          categoryCounts[categoryName]++;
+          maxItemCount = Math.max(maxItemCount, categoryCounts[categoryName]);
+        }
+      });
+  
+      // Update category data state
+      const updatedCategoryData = categoryData.map(category => ({
+        ...category,
+        count: categoryCounts[category.name] || 0
+      }));
+  
+      setCategoryData(updatedCategoryData);
+      setMaxCount(maxItemCount);
       setError('');
     } catch (error) {
       console.error("Error fetching inventory stats:", error);
@@ -65,84 +126,133 @@ function Dashboard() {
       setLoading(false);
     }
   };
+  
 
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
-
-  const handleUpdateProfile = () => {
-    updateUser({ ...user, ...userInfo });
-    handleCloseDialog();
-  };
+  const StatCard = ({ icon: Icon, title, value, color }) => (
+    <Card sx={{ height: '100%', bgcolor: 'white', boxShadow: 2 }}>
+      <CardContent>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Box sx={{ 
+              bgcolor: `${color}.light`, 
+              borderRadius: '50%', 
+              width: 40, 
+              height: 40, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              mb: 1
+            }}>
+              <Icon sx={{ color: `${color}.main` }} />
+            </Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+              {loading ? '...' : value}
+            </Typography>
+            <Typography color="text.secondary" variant="body2">
+              {title}
+            </Typography>
+          </Box>
+          <IconButton size="small">
+            <ArrowIcon />
+          </IconButton>
+        </Box>
+      </CardContent>
+    </Card>
+  );
 
   return (
-    <Box>
+    <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
+        Inventory Management
+      </Typography>
+      <Typography variant="h6" sx={{ mb: 3 }}>
+        Dashboard
+      </Typography>
+
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={4}>
+          <StatCard 
+            icon={ProductIcon}
+            title="Claimed"
+            value={stats.claimed}
+            color="stop"
+          />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <StatCard 
+            icon={TrendingIcon}
+            title="Unclaimed"
+            value={stats.unclaimed}
+            color="stop"
+          />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <StatCard 
+            icon={Windows}
+            title="Total Items"
+            value={stats.totalItems}
+            color="stop"
+          />
+        </Grid>
+      </Grid>
+
+      {/* Stock Value and Categories Section */}
       <Grid container spacing={3}>
-        {/* User Profile Card */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box>
-                <Typography variant="h5" gutterBottom>
-                  Welcome, {user?.fullName || user?.username}
-                </Typography>
-                <Typography color="text.secondary">
-                  {user?.email}
-                </Typography>
-              </Box>
-              <Button variant="outlined" onClick={handleOpenDialog}>
-                Edit Profile
-              </Button>
-            </Box>
-          </Paper>
-        </Grid>
-
-        {/* Statistics Cards */}
-        <Grid item xs={12} sm={4}>
-          <Card>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ bgcolor: 'primary.dark', color: 'white', height: '100%' }}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <InventoryIcon sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4">
-                    {loading ? '...' : stats.totalItems}
-                  </Typography>
-                  <Typography color="text.secondary">Total Items</Typography>
-                </Box>
+              <Typography variant="h6" sx={{ mb: 4 }}>
+                Recently Added Item
+              </Typography>
+              <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
+                One Piece Chapter 1015
+              </Typography>
+              
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Manga
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography>Unfulfilled</Typography>
+                <Typography>{stats.unfulfilled}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography>Received</Typography>
+                <Typography>{stats.received}</Typography>
               </Box>
             </CardContent>
           </Card>
         </Grid>
-
-        <Grid item xs={12} sm={4}>
+        
+        <Grid item xs={12} md={8}>
           <Card>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <CategoryIcon sx={{ fontSize: 40, color: 'success.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4">{stats.categories}</Typography>
-                  <Typography color="text.secondary">Categories</Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <WarningIcon sx={{ fontSize: 40, color: 'warning.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4">
-                    {loading ? '...' : stats.lowStock}
-                  </Typography>
-                  <Typography color="text.secondary">Unclaimed Items</Typography>
-                </Box>
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                Category Distribution
+              </Typography>
+              <Box sx={{ width: '100%' }}>
+                {categoryData.map((category, index) => {
+                  const Icon = category.icon;
+                  const progressValue = maxCount > 0 ? (category.count / maxCount) * 100 : 0;
+                  
+                  return (
+                    <Box key={index} sx={{ mb: 3 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Icon sx={{ mr: 1 }} />
+                        <Typography variant="body2">
+                          {category.name}
+                        </Typography>
+                        <Typography variant="body2" sx={{ ml: 'auto' }}>
+                          {loading ? '...' : `${category.count} items`}
+                        </Typography>
+                      </Box>
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={progressValue} 
+                        sx={{ height: 8, borderRadius: 4 }}
+                      />
+                    </Box>
+                  );
+                })}
               </Box>
             </CardContent>
           </Card>
@@ -156,36 +266,17 @@ function Dashboard() {
         </Box>
       )}
 
-      {/* Edit Profile Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Profile</DialogTitle>
+      {/* Profile Dialog */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="xs">
+        <DialogTitle>Profile</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-            <TextField
-              label="Full Name"
-              fullWidth
-              value={userInfo.fullName}
-              onChange={(e) => setUserInfo({ ...userInfo, fullName: e.target.value })}
-            />
-            <TextField
-              label="Email"
-              fullWidth
-              value={userInfo.email}
-              onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-            />
-            <TextField
-              label="Username"
-              fullWidth
-              value={userInfo.username}
-              disabled
-            />
-          </Box>
+          <TextField fullWidth label="Full Name" value={userInfo.fullName} onChange={(e) => setUserInfo({ ...userInfo, fullName: e.target.value })} />
+          <TextField fullWidth label="Email" value={userInfo.email} onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })} sx={{ mt: 2 }} />
+          <TextField fullWidth label="Username" value={userInfo.username} onChange={(e) => setUserInfo({ ...userInfo, username: e.target.value })} sx={{ mt: 2 }} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button variant="contained" onClick={handleUpdateProfile}>
-            Save Changes
-          </Button>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button onClick={() => updateUser(userInfo)} color="primary">Save</Button>
         </DialogActions>
       </Dialog>
     </Box>
