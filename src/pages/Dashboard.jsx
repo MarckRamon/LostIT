@@ -73,9 +73,9 @@ function Dashboard() {
       const items = itemsResponse.data;
   
       // Calculate claimed, unclaimed, total items, and stock value
-      const claimed = items.filter(item => item.claimed === true).length;
+      const claimed = items.filter(item => item.status === 'Claimed').length;
       const totalItems = items.length;
-      const unclaimed = items.filter(item => item.claimed === false).length;
+      const unclaimed = items.filter(item => item.status === 'Unclaimed').length;
       const stockValue = items.reduce((total, item) => total + (item.price * item.quantity), 0);
   
       // Update stats with the calculated values
