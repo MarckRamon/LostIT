@@ -111,7 +111,7 @@ const Login = () => {
         loop
         playsInline
       >
-        <source src="/ph.mp4" type="video/mp4" />
+        <source src="/win11.mp4" type="video/mp4" />
       </video>
 
       {/* Blur Overlay */}
@@ -368,7 +368,7 @@ const Login = () => {
               fontFamily: 'Segoe UI, sans-serif',
             }}
           >
-            Click to unlock or press space
+            Click here to unlock
           </Typography>
         )}
       </Container>

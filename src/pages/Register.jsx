@@ -175,7 +175,7 @@ const Register = () => {
         loop
         id="bgVideo"
       >
-        <source src="/ph.mp4" type="video/mp4" />
+        <source src="/win11.mp4" type="video/mp4" />
       </video>
 
       {/* Blur Overlay */}

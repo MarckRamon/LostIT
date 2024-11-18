@@ -46,7 +46,7 @@ function ForgotPassword() {
   return (
     <div className="login-container">
       <video className="video-background" autoPlay muted loop id="bgVideo">
-        <source src="/ph.mp4" type="video/mp4" />
+        <source src="/win11.mp4" type="video/mp4" />
       </video>
       <div className="background-overlay"></div>
 
