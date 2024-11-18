@@ -162,7 +162,7 @@ function Dashboard() {
 
   return (
     <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'black' }}>
         Dashboard Analytics
       </Typography>
     
