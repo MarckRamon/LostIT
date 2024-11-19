@@ -205,14 +205,14 @@ function Dashboard() {
         <Grid item xs={12} md={4}>
           <Card sx={{ bgcolor: 'primary.dark', color: 'white', height: '100%' }}>
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 4 }}>
+              <Typography variant="h5" sx={{ mb: 4 }}>
                 Recently Added Item
               </Typography>
-              <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
+              <Typography variant="h2" sx={{ mb: 1, fontWeight: 'bold' }}>
                 {loading ? 'Loading...' : (recentItem ? recentItem.itemName : 'No items')}
               </Typography>
               
-              <Typography variant="h6" sx={{ mb: 2 }}>
+              <Typography variant="h5" sx={{ mb: 4 }}>
                 {loading ? 'Loading...' : (recentItem && recentItem.category ? recentItem.category.categoryName : 'No category')}
               </Typography>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
