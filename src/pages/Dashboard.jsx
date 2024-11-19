@@ -59,6 +59,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [maxCount, setMaxCount] = useState(0);
+  const [recentItem, setRecentItem] = useState(null);
 
   useEffect(() => {
     fetchInventoryStats();
@@ -72,6 +73,13 @@ function Dashboard() {
       const itemsResponse = await axiosInstance.get('/api/items/getAllItems');
       const items = itemsResponse.data;
   
+      // Find the most recent item (highest ID)
+      const mostRecentItem = items.reduce((prev, current) => {
+        return (prev.itemId > current.itemId) ? prev : current;
+      }, items[0]);
+      
+      setRecentItem(mostRecentItem);
+  
       // Calculate claimed, unclaimed, total items, and stock value
       const claimed = items.filter(item => item.status === 'Claimed').length;
       const totalItems = items.length;
@@ -84,7 +92,7 @@ function Dashboard() {
         totalItems,
         unclaimed,
         stockValue,
-        unfulfilled: 4, // Assuming static values for these two
+        unfulfilled: 4,
         received: 1,
       });
   
@@ -126,7 +134,6 @@ function Dashboard() {
       setLoading(false);
     }
   };
-  
 
   const StatCard = ({ icon: Icon, title, value, color }) => (
     <Card sx={{ height: '100%', bgcolor: 'white', boxShadow: 2 }}>
@@ -166,7 +173,6 @@ function Dashboard() {
         Dashboard Analytics
       </Typography>
     
-
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={4}>
           <StatCard 
@@ -203,11 +209,11 @@ function Dashboard() {
                 Recently Added Item
               </Typography>
               <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
-                One Piece Chapter 1015
+                {loading ? 'Loading...' : (recentItem ? recentItem.itemName : 'No items')}
               </Typography>
               
               <Typography variant="h6" sx={{ mb: 2 }}>
-                Manga
+                {loading ? 'Loading...' : (recentItem && recentItem.category ? recentItem.category.categoryName : 'No category')}
               </Typography>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography>Unfulfilled</Typography>
