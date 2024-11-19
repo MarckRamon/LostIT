@@ -16,9 +16,12 @@ import { useAuth } from '../context/AuthContext'; // Assuming you use an AuthCon
 function EditProfile() {
   const { user, updateUser } = useAuth(); // Access current user and updateUser from AuthContext
   const [userInfo, setUserInfo] = useState({
+    email: '',
     firstName: '',
     lastName: '',
-    email: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
     phoneNumber: '',
   });
 
@@ -27,47 +30,73 @@ function EditProfile() {
     lastName: false,
     email: false,
     phoneNumber: false,
+    password: false,
   });
 
   // Fetch user details when component mounts
   useEffect(() => {
+    console.log("Current user in EditProfile:", user); // Debug log
+    
     if (user) {
+      console.log("Setting user info with:", user); // Debug log
       setUserInfo({
         email: user.email || '',
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         username: user.username || '',
-        password: user.password || '',
+        password: '',
+        confirmPassword: '',
         phoneNumber: user.phoneNumber || '',
       });
     }
   }, [user]);
 
-  // Update admin details
+  
   const updateAdminDetails = async () => {
+    if (userInfo.password !== userInfo.confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
     try {
-      // Send a PUT request with the user's ID in the URL
-      const response = await axios.put(`/updateAdminDetails/${user.id}`, userInfo);
+      if (!user || !user.adminId) {
+        alert('Admin ID is missing!');
+        return;
+      }
+  
+      
+      console.log("Current user:", user);
+      console.log("User info being sent:", userInfo);
+      console.log("Admin ID being used:", user.adminId);
+  
+      const response = await axios.put(
+        `http://localhost:8080/api/admins/updateAdminDetails/${user.adminId}`,  // added full URL kay di mogana basta di
+        userInfo
+      );
+  
+      console.log("Response received:", response);  
   
       if (response.status === 200) {
-        updateUser(response.data); // Update context with new user data
+        updateUser(response.data);
         alert('Profile updated successfully!');
         setEditState({
           firstName: false,
           lastName: false,
           email: false,
           phoneNumber: false,
+          password: false,
         });
       } else {
         alert('Failed to update profile. Please try again.');
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('An error occurred while updating your profile.');
+      // More detailed error logging
+      console.error('Full error object:', error);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error message:', error.message);
+      alert(`Error updating profile: ${error.response?.data?.message || error.message}`);
     }
   };
-  
-  
 
   const handleInputChange = (field, value) => {
     setUserInfo({ ...userInfo, [field]: value });
@@ -82,17 +111,16 @@ function EditProfile() {
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'black' }}>
         My Profile
       </Typography>
-          {/* Profile Header */}
-          <Card sx={{ mb: 3, p: 2, display: 'flex', alignItems: 'center', boxShadow: 2 }}>
+      {/* Profile Header */}
+      <Card sx={{ mb: 3, p: 2, display: 'flex', alignItems: 'center', boxShadow: 2 }}>
         <Avatar
           alt="Anzy"
           src="/path/to/avatar.jpg"
           sx={{ width: 80, height: 80, mr: 3 }}
         />
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h5">{userInfo.firstName}</Typography>
+          <Typography variant="h5">{userInfo.firstName} {userInfo.lastName}</Typography>
           <Typography variant="body2" color="text.secondary">{userInfo.bio}</Typography>
-          <Typography variant="body2" color="text.secondary">sample, sample </Typography>
         </Box>
         <IconButton>
           <EditIcon />
@@ -100,11 +128,12 @@ function EditProfile() {
       </Card>
       <Card sx={{ p: 2, boxShadow: 2 }}>
         <Grid container spacing={2}>
-          {['firstName', 'lastName', 'email', 'phoneNumber'].map((field) => (
+          {['firstName', 'lastName', 'email', 'phoneNumber', 'password'].map((field) => (
             <Grid item xs={12} md={6} key={field}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <TextField
                   fullWidth
+                  type={field.includes('password') ? 'password' : 'text'}
                   label={field
                     .replace(/([A-Z])/g, ' $1')
                     .replace(/^./, (str) => str.toUpperCase())}
@@ -118,6 +147,16 @@ function EditProfile() {
               </Box>
             </Grid>
           ))}
+          {/* Confirm Password Field */}
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              type="password"
+              label="Confirm Password"
+              value={userInfo.confirmPassword}
+              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+            />
+          </Grid>
         </Grid>
         <Box sx={{ mt: 3, textAlign: 'right' }}>
           <Button

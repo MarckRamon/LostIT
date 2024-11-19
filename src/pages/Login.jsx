@@ -50,12 +50,21 @@ const Login = () => {
     }
 
     const user = adminList.find((user) => user.username === formData.username);
+    console.log("Found user data:", user);
     if (user.password !== formData.password) {
       setError('Wrong password');
       return;
     }
 
-    login({ username: user.username });
+    login({ 
+      adminId: user.adminId,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phoneNumber: user.phoneNumber
+    });
+    console.log("Logged in with user data:", user);
     navigate('/');
   };
 
