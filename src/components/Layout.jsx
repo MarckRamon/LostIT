@@ -248,7 +248,7 @@ function Layout({ children }) {
                 },
               }}
             >
-              <MenuItem onClick={() => { handleClose(); navigate('/'); }}>
+              <MenuItem onClick={() => { handleClose(); navigate('/edit-profile'); }}>
                 <ListItemIcon>
                   <AccountCircleIcon fontSize="small" />
                 </ListItemIcon>
