@@ -26,7 +26,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 
-const drawerWidth = 240;
+const drawerWidth = 280;
 
 function Layout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -58,8 +58,16 @@ function Layout({ children }) {
   ];
 
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Toolbar>
+    <Box sx={{ 
+      height: '100%', 
+      display: 'flex', 
+      flexDirection: 'column',
+      bgcolor: 'background.paper',
+    }}>
+      <Toolbar sx={{ 
+        minHeight: '64px !important',
+        bgcolor: 'background.paper',
+      }}>
         <Typography 
           variant="h6" 
           noWrap 
@@ -67,6 +75,10 @@ function Layout({ children }) {
           onClick={() => navigate('/')}
           sx={{ 
             cursor: 'pointer',
+            fontWeight: 600,
+            background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
             '&:hover': {
               opacity: 0.8
             }
@@ -75,16 +87,43 @@ function Layout({ children }) {
           LostIT
         </Typography>
       </Toolbar>
-      <Divider />
-      <List>
+      <Divider sx={{ opacity: 0.1 }} />
+      <List sx={{ px: 2, py: 1 }}>
         {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
+          <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
             <ListItemButton
               selected={location.pathname === item.path}
               onClick={() => navigate(item.path)}
+              sx={{
+                borderRadius: 2,
+                '&.Mui-selected': {
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  },
+                  '& .MuiListItemIcon-root': {
+                    color: 'white',
+                  }
+                },
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                }
+              }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemIcon sx={{ 
+                minWidth: 40,
+                color: location.pathname === item.path ? 'white' : 'primary.main'
+              }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText 
+                primary={item.text} 
+                primaryTypographyProps={{
+                  fontSize: '0.9rem',
+                  fontWeight: location.pathname === item.path ? 600 : 400
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}
@@ -96,30 +135,67 @@ function Layout({ children }) {
     <Box sx={{ display: 'flex' }}>
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ minHeight: '64px !important' }}>
           <IconButton
             color="inherit"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ 
+              mr: 2, 
+              display: { sm: 'none' },
+              color: 'text.primary'
+            }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography 
+            variant="h6" 
+            noWrap 
+            component="div" 
+            sx={{ 
+              flexGrow: 1,
+              color: 'text.primary',
+              fontSize: '1.1rem',
+              fontWeight: 500
+            }}
+          >
             {menuItems.find((item) => item.path === location.pathname)?.text || 'Dashboard'}
           </Typography>
           <div>
             <IconButton
-              size="large"
+              size="small"
               onClick={handleMenu}
-              color="inherit"
+              sx={{ 
+                ml: 2,
+                border: '2px solid',
+                borderColor: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'primary.main',
+                  '& .MuiAvatar-root': {
+                    color: 'white',
+                    bgcolor: 'transparent'
+                  }
+                }
+              }}
             >
-              <Avatar sx={{ width: 32, height: 32 }}>
+              <Avatar 
+                sx={{ 
+                  width: 32, 
+                  height: 32,
+                  bgcolor: 'transparent',
+                  color: 'primary.main',
+                  fontWeight: 600
+                }}
+              >
                 {user?.username?.[0]?.toUpperCase()}
               </Avatar>
             </IconButton>
@@ -127,18 +203,34 @@ function Layout({ children }) {
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleClose}
+              PaperProps={{
+                elevation: 0,
+                sx: {
+                  mt: 1.5,
+                  overflow: 'visible',
+                  filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.08))',
+                  borderRadius: 2,
+                  '& .MuiMenuItem-root': {
+                    px: 2,
+                    py: 1,
+                    borderRadius: 1,
+                    mx: 0.5,
+                    my: 0.25
+                  }
+                },
+              }}
             >
               <MenuItem onClick={() => { handleClose(); navigate('/'); }}>
                 <ListItemIcon>
                   <AccountCircleIcon fontSize="small" />
                 </ListItemIcon>
-                Profile
+                <Typography variant="body2">Profile</Typography>
               </MenuItem>
               <MenuItem onClick={handleLogout}>
                 <ListItemIcon>
-                  <LogoutIcon fontSize="small" />
+                  <LogoutIcon fontSize="small" sx={{ color: 'error.main' }} />
                 </ListItemIcon>
-                Logout
+                <Typography variant="body2" color="error">Logout</Typography>
               </MenuItem>
             </Menu>
           </div>
@@ -153,11 +245,16 @@ function Layout({ children }) {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true,
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: drawerWidth,
+              borderRight: '1px solid',
+              borderColor: 'divider',
+            },
           }}
         >
           {drawer}
@@ -166,7 +263,12 @@ function Layout({ children }) {
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: drawerWidth,
+              borderRight: '1px solid',
+              borderColor: 'divider',
+            },
           }}
           open
         >
@@ -180,7 +282,7 @@ function Layout({ children }) {
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           mt: 8,
-          backgroundColor: 'background.default',
+          bgcolor: '#F5F6F7',
           minHeight: '100vh',
         }}
       >
