@@ -34,7 +34,8 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     email: '',
-    fullName: '',
+    firstName: '',
+    lastName: '',
     phoneNumber: '',
   });
   const [error, setError] = useState('');
@@ -64,7 +65,8 @@ const Register = () => {
         username: formData.username,
         password: formData.password,
         email: formData.email,
-        fullName: formData.fullName,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         phoneNumber: formData.phoneNumber,
       });
 
@@ -86,7 +88,7 @@ const Register = () => {
     return currentTime.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
     });
   };
 
@@ -94,7 +96,7 @@ const Register = () => {
     return currentTime.toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -103,8 +105,14 @@ const Register = () => {
       label: 'Personal Info',
       fields: [
         {
-          name: 'fullName',
-          label: 'Full Name',
+          name: 'firstName',
+          label: 'First Name',
+          type: 'text',
+          icon: <Person />,
+        },
+        {
+          name: 'lastName',
+          label: 'Last Name',
           type: 'text',
           icon: <Person />,
         },
