@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
+import EditProfile from './pages/EditProfile';
 import ForgotPassword from './pages/ForgotPassword';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -64,6 +65,13 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Inventory />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/edit-profile" element={
+              <ProtectedRoute>
+                <Layout>
+                  <EditProfile/>
                 </Layout>
               </ProtectedRoute>
             } />

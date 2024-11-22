@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
+    console.log("Setting user data in context:", userData);
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (userData) => {
+    console.log("Updating user data in context:", userData);
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
