@@ -29,6 +29,7 @@ import { useAuth } from '../context/AuthContext';
 const drawerWidth = 280;
 
 function Layout({ children }) {
+  // ... (previous state and handlers remain the same)
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const { user, logout } = useAuth();
@@ -65,9 +66,23 @@ function Layout({ children }) {
       bgcolor: 'background.paper',
     }}>
       <Toolbar sx={{ 
-        minHeight: '64px !important',
+        minHeight: '80px !important', // Increased height
         bgcolor: 'background.paper',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        px: 2, // Added horizontal padding
       }}>
+        <Box
+          component="img"
+          src="/LostITbg.png"
+          alt="LostIT Logo"
+          sx={{
+            height: 75, // Increased from 40
+            width: 75,  // Increased from 40
+            objectFit: 'contain'
+          }} 
+        />
         <Typography 
           variant="h6" 
           noWrap 
@@ -76,6 +91,7 @@ function Layout({ children }) {
           sx={{ 
             cursor: 'pointer',
             fontWeight: 600,
+            fontSize: '1.5rem', // Increased font size
             background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
             backgroundClip: 'text',
             textFillColor: 'transparent',
@@ -144,7 +160,7 @@ function Layout({ children }) {
           borderColor: 'divider',
         }}
       >
-        <Toolbar sx={{ minHeight: '64px !important' }}>
+        <Toolbar sx={{ minHeight: '80px !important' }}> {/* Increased height */}
           <IconButton
             color="inherit"
             edge="start"
@@ -157,6 +173,18 @@ function Layout({ children }) {
           >
             <MenuIcon />
           </IconButton>
+          <Box
+            component="img"
+            src="/LostITbg.png"
+            alt="LostIT Logo"
+            sx={{
+              height: 48, // Increased from 32
+              width: 48,  // Increased from 32
+              objectFit: 'contain',
+              display: { xs: 'none', sm: 'block' },
+              mr: 2
+            }}
+          />
           <Typography 
             variant="h6" 
             noWrap 
@@ -164,7 +192,7 @@ function Layout({ children }) {
             sx={{ 
               flexGrow: 1,
               color: 'text.primary',
-              fontSize: '1.1rem',
+              fontSize: '1.2rem', // Increased font size
               fontWeight: 500
             }}
           >
