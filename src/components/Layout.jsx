@@ -13,9 +13,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Avatar,
-  Menu,
-  MenuItem,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -29,23 +26,13 @@ import { useAuth } from '../context/AuthContext';
 const drawerWidth = 280;
 
 function Layout({ children }) {
-  // ... (previous state and handlers remain the same)
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
-  };
-
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
   };
 
   const handleLogout = () => {
@@ -56,7 +43,7 @@ function Layout({ children }) {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
-    { text: 'Logs', icon: <InventoryIcon />, path: '/claim-log'},
+    { text: 'Claim Logs', icon: <InventoryIcon />, path: '/claim-log'},
   ];
 
   const drawer = (
@@ -67,20 +54,20 @@ function Layout({ children }) {
       bgcolor: 'background.paper',
     }}>
       <Toolbar sx={{ 
-        minHeight: '80px !important', // Increased height
+        minHeight: '80px !important',
         bgcolor: 'background.paper',
         display: 'flex',
         alignItems: 'center',
         gap: 2,
-        px: 2, // Added horizontal padding
+        px: 2,
       }}>
         <Box
           component="img"
           src="/LostITbg.png"
           alt="LostIT Logo"
           sx={{
-            height: 75, // Increased from 40
-            width: 75,  // Increased from 40
+            height: 75,
+            width: 75,
             objectFit: 'contain'
           }} 
         />
@@ -92,7 +79,7 @@ function Layout({ children }) {
           sx={{ 
             cursor: 'pointer',
             fontWeight: 600,
-            fontSize: '1.5rem', // Increased font size
+            fontSize: '1.5rem',
             background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
             backgroundClip: 'text',
             textFillColor: 'transparent',
@@ -105,7 +92,7 @@ function Layout({ children }) {
         </Typography>
       </Toolbar>
       <Divider sx={{ opacity: 0.1 }} />
-      <List sx={{ px: 2, py: 1 }}>
+      <List sx={{ px: 2, py: 1, flexGrow: 1 }}>
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
             <ListItemButton
@@ -145,6 +132,58 @@ function Layout({ children }) {
           </ListItem>
         ))}
       </List>
+      <Divider sx={{ opacity: 0.1 }} />
+      <List sx={{ px: 2, py: 1 }}>
+        <ListItem disablePadding sx={{ mb: 1 }}>
+          <ListItemButton
+            onClick={() => navigate('/edit-profile')}
+            sx={{
+              borderRadius: 2,
+              '&:hover': {
+                bgcolor: 'action.hover',
+              }
+            }}
+          >
+            <ListItemIcon sx={{ 
+              minWidth: 40,
+              color: 'primary.main'
+            }}>
+              <AccountCircleIcon />
+            </ListItemIcon>
+            <ListItemText 
+              primary="Profile" 
+              primaryTypographyProps={{
+                fontSize: '0.9rem',
+              }}
+            />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            onClick={handleLogout}
+            sx={{
+              borderRadius: 2,
+              '&:hover': {
+                bgcolor: 'action.hover',
+              }
+            }}
+          >
+            <ListItemIcon sx={{ 
+              minWidth: 40,
+              color: 'error.main'
+            }}>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText 
+              primary="Logout" 
+              primaryTypographyProps={{
+                fontSize: '0.9rem',
+                color: 'error.main'
+              }}
+            />
+          </ListItemButton>
+        </ListItem>
+      </List>
     </Box>
   );
 
@@ -161,7 +200,7 @@ function Layout({ children }) {
           borderColor: 'divider',
         }}
       >
-        <Toolbar sx={{ minHeight: '80px !important' }}> {/* Increased height */}
+        <Toolbar sx={{ minHeight: '80px !important' }}>
           <IconButton
             color="inherit"
             edge="start"
@@ -179,8 +218,8 @@ function Layout({ children }) {
             src="/LostITbg.png"
             alt="LostIT Logo"
             sx={{
-              height: 48, // Increased from 32
-              width: 48,  // Increased from 32
+              height: 48,
+              width: 48,
               objectFit: 'contain',
               display: { xs: 'none', sm: 'block' },
               mr: 2
@@ -193,76 +232,12 @@ function Layout({ children }) {
             sx={{ 
               flexGrow: 1,
               color: 'text.primary',
-              fontSize: '1.2rem', // Increased font size
+              fontSize: '1.2rem',
               fontWeight: 500
             }}
           >
             {menuItems.find((item) => item.path === location.pathname)?.text || 'Dashboard'}
           </Typography>
-          <div>
-            <IconButton
-              size="small"
-              onClick={handleMenu}
-              sx={{ 
-                ml: 2,
-                border: '2px solid',
-                borderColor: 'primary.main',
-                '&:hover': {
-                  bgcolor: 'primary.main',
-                  '& .MuiAvatar-root': {
-                    color: 'white',
-                    bgcolor: 'transparent'
-                  }
-                }
-              }}
-            >
-              <Avatar 
-                sx={{ 
-                  width: 32, 
-                  height: 32,
-                  bgcolor: 'transparent',
-                  color: 'primary.main',
-                  fontWeight: 600
-                }}
-              >
-                {user?.username?.[0]?.toUpperCase()}
-              </Avatar>
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              PaperProps={{
-                elevation: 0,
-                sx: {
-                  mt: 1.5,
-                  overflow: 'visible',
-                  filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.08))',
-                  borderRadius: 2,
-                  '& .MuiMenuItem-root': {
-                    px: 2,
-                    py: 1,
-                    borderRadius: 1,
-                    mx: 0.5,
-                    my: 0.25
-                  }
-                },
-              }}
-            >
-              <MenuItem onClick={() => { handleClose(); navigate('/edit-profile'); }}>
-                <ListItemIcon>
-                  <AccountCircleIcon fontSize="small" />
-                </ListItemIcon>
-                <Typography variant="body2">Profile</Typography>
-              </MenuItem>
-              <MenuItem onClick={handleLogout}>
-                <ListItemIcon>
-                  <LogoutIcon fontSize="small" sx={{ color: 'error.main' }} />
-                </ListItemIcon>
-                <Typography variant="body2" color="error">Logout</Typography>
-              </MenuItem>
-            </Menu>
-          </div>
         </Toolbar>
       </AppBar>
       <Box

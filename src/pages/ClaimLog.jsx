@@ -30,6 +30,7 @@ const api = axios.create({
 
 const ClaimLog = () => {
   const [claims, setClaims] = useState([]);
+  const [filteredClaims, setFilteredClaims] = useState([]);
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -43,11 +44,22 @@ const ClaimLog = () => {
   const [loading, setLoading] = useState(true);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [claimToDelete, setClaimToDelete] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchItems();
     fetchClaims();
   }, []);
+
+  useEffect(() => {
+    const filtered = claims.filter(claim => 
+      claim.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      claim.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      claim.studEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      claim.item?.itemName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredClaims(filtered);
+  }, [searchTerm, claims]);
 
   const fetchItems = async () => {
     try {
@@ -150,24 +162,33 @@ const ClaimLog = () => {
 
   return (
     <div>
-      <Typography variant="h4" gutterBottom color="black">
-        Claim Log
-      </Typography>
-      
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <TextField
+          label="Search Logs"
+          variant="outlined"
+          fullWidth
+          sx={{ mr: 2 }}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <Button 
+          variant="contained" 
+          color="primary" 
+          sx={{ 
+            height: '56px',
+            minWidth: '120px' 
+          }}
+          onClick={() => setOpen(true)}
+        >
+          Add Claim
+        </Button>
+      </Box>
+
       {error && (
         <Typography color="error" sx={{ mb: 2 }}>
           Error: {error}
         </Typography>
       )}
-
-      <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={() => setOpen(true)}
-        sx={{ mb: 3 }}
-      >
-        Add Claim
-      </Button>
 
       <TableContainer component={Paper}>
         <Table>
@@ -186,12 +207,12 @@ const ClaimLog = () => {
               <TableRow>
                 <TableCell colSpan={6} align="center">Loading claims...</TableCell>
               </TableRow>
-            ) : claims.length === 0 ? (
+            ) : filteredClaims.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">No claims found</TableCell>
               </TableRow>
             ) : (
-              claims.map((claim, index) => (
+              filteredClaims.map((claim, index) => (
                 <TableRow key={claim.claimId || index}>
                   <TableCell>{claim.firstName}</TableCell>
                   <TableCell>{claim.lastName}</TableCell>
