@@ -162,6 +162,7 @@ const ClaimLog = () => {
 
   return (
     <div>
+      <br/>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <TextField
           label="Search Logs"
