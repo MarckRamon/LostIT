@@ -13,6 +13,9 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -20,6 +23,8 @@ import {
   Inventory as InventoryIcon,
   AccountCircle as AccountCircleIcon,
   Logout as LogoutIcon,
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 
@@ -27,9 +32,20 @@ const drawerWidth = 280;
 
 function Layout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const theme = createTheme({
+    palette: {
+      mode: darkMode ? 'dark' : 'light',
+      background: {
+        default: darkMode ? '#121212' : '#F5F6F7',
+        paper: darkMode ? '#1E1E1E' : '#FFFFFF',
+      },
+    },
+  });
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -40,36 +56,29 @@ function Layout({ children }) {
     navigate('/login');
   };
 
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/' },
     { text: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
     { text: 'Claim Logs', icon: <InventoryIcon />, path: '/claim-log'},
   ];
 
   const drawer = (
-    <Box sx={{ 
-      height: '100%', 
-      display: 'flex', 
-      flexDirection: 'column',
-      bgcolor: 'background.paper',
-    }}>
-      <Toolbar sx={{ 
-        minHeight: '80px !important',
-        bgcolor: 'background.paper',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        px: 2,
-      }}>
+    <>
+      <Toolbar sx={{ display: 'flex', alignItems: 'left', justifyContent: 'left'}}>
         <Box
           component="img"
           src="/LostITbg.png"
           alt="LostIT Logo"
-          sx={{
-            height: 75,
-            width: 75,
+          sx={{ 
+            height: 48, 
+            width: 48,
+            ml: -0.5,
             objectFit: 'contain'
-          }} 
+          }}
         />
         <Typography 
           variant="h6" 
@@ -184,115 +193,126 @@ function Layout({ children }) {
           </ListItemButton>
         </ListItem>
       </List>
-    </Box>
+    </>
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <AppBar
-        position="fixed"
-        elevation={0}
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          bgcolor: 'background.paper',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Toolbar sx={{ minHeight: '80px !important' }}>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ 
-              mr: 2, 
-              display: { sm: 'none' },
-              color: 'text.primary'
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex' }}>
+        <AppBar
+          position="fixed"
+          elevation={0}
+          sx={{
+            width: { sm: `calc(100% - ${drawerWidth}px)` },
+            ml: { sm: `${drawerWidth}px` },
+            bgcolor: 'background.paper',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Toolbar sx={{ minHeight: '80px !important', display: 'flex', alignItems: 'center' }}>
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ 
+                mr: 2, 
+                display: { sm: 'none' },
+                color: 'text.primary'
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+              <Box
+                component="img"
+                src="/LostITbg.png"
+                alt="LostIT Logo"
+                sx={{
+                  height: 48,
+                  width: 48,
+                  objectFit: 'contain',
+                  display: { xs: 'none', sm: 'block' },
+                  mr: 2
+                }}
+              />
+              <Typography 
+                variant="h6" 
+                noWrap 
+                component="div" 
+                sx={{ 
+                  color: 'text.primary',
+                  fontSize: '1.2rem',
+                  fontWeight: 500
+                }}
+              >
+                {menuItems.find((item) => item.path === location.pathname)?.text || 'Dashboard'}
+              </Typography>
+            </Box>
+            <IconButton 
+              color="inherit"
+              onClick={toggleDarkMode}
+              sx={{ color: 'text.primary' }}
+            >
+              {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+        <Box
+          component="nav"
+          sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        >
+          <Drawer
+            variant="temporary"
+            open={mobileOpen}
+            onClose={handleDrawerToggle}
+            ModalProps={{
+              keepMounted: true,
             }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Box
-            component="img"
-            src="/LostITbg.png"
-            alt="LostIT Logo"
             sx={{
-              height: 48,
-              width: 48,
-              objectFit: 'contain',
-              display: { xs: 'none', sm: 'block' },
-              mr: 2
-            }}
-          />
-          <Typography 
-            variant="h6" 
-            noWrap 
-            component="div" 
-            sx={{ 
-              flexGrow: 1,
-              color: 'text.primary',
-              fontSize: '1.2rem',
-              fontWeight: 500
+              display: { xs: 'block', sm: 'none' },
+              '& .MuiDrawer-paper': { 
+                boxSizing: 'border-box', 
+                width: drawerWidth,
+                borderRight: '1px solid',
+                borderColor: 'divider',
+              },
             }}
           >
-            {menuItems.find((item) => item.path === location.pathname)?.text || 'Dashboard'}
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-      >
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
+            {drawer}
+          </Drawer>
+          <Drawer
+            variant="permanent"
+            sx={{
+              display: { xs: 'none', sm: 'block' },
+              '& .MuiDrawer-paper': { 
+                boxSizing: 'border-box', 
+                width: drawerWidth,
+                borderRight: '1px solid',
+                borderColor: 'divider',
+              },
+            }}
+            open
+          >
+            {drawer}
+          </Drawer>
+        </Box>
+        <Box
+          component="main"
           sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
-              width: drawerWidth,
-              borderRight: '1px solid',
-              borderColor: 'divider',
-            },
+            flexGrow: 1,
+            p: 3,
+            width: { sm: `calc(100% - ${drawerWidth}px)` },
+            mt: 8,
+            bgcolor: 'background.default',
+            minHeight: '100vh',
           }}
         >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
-              width: drawerWidth,
-              borderRight: '1px solid',
-              borderColor: 'divider',
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
+          {children}
+        </Box>
       </Box>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          mt: 8,
-          bgcolor: '#F5F6F7',
-          minHeight: '100vh',
-        }}
-      >
-        {children}
-      </Box>
-    </Box>
+    </ThemeProvider>
   );
 }
 
