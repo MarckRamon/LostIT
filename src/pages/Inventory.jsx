@@ -568,6 +568,7 @@ function Inventory() {
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               label="Status"
+              disabled
             >
               <MenuItem value="Unclaimed">Unclaimed</MenuItem>
               <MenuItem value="Claimed">Claimed</MenuItem>

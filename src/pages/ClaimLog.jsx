@@ -14,8 +14,19 @@ import {
   Paper,
   MenuItem,
   Select,
+  FormControl,
+  InputLabel,
+  IconButton,
 } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
 import axios from "axios";
+
+const api = axios.create({
+  baseURL: 'http://localhost:8080',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 const ClaimLog = () => {
   const [claims, setClaims] = useState([]);
@@ -25,83 +36,184 @@ const ClaimLog = () => {
     lastName: "",
     studEmail: "",
     dateClaimed: "",
-    itemId: "", // Add a new state variable for the selected item
+    itemId: "",
   });
   const [itemOptions, setItemOptions] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [claimToDelete, setClaimToDelete] = useState(null);
 
   useEffect(() => {
-    const fetchClaims = async () => {
-      try {
-        // ...
-        setClaims(Array.isArray(response.data) ? response.data : []);
-        // Get all items from API
-        const itemsResponse = await axios.get("/api/items getAllItems");
-        setItemOptions(itemsResponse.data.map((item) => ({ value: item.id, label: item.name })));
-      } catch (error) {
-        console.error("Error fetching claims:", error);
-        setClaims([]);
+    fetchItems();
+    fetchClaims();
+  }, []);
+
+  const fetchItems = async () => {
+    try {
+      const response = await api.get("/api/items/getAllItems");
+      console.log('Items fetched:', response.data);
+      if (Array.isArray(response.data)) {
+        const formattedItems = response.data.map(item => ({
+          value: item.itemId,
+          label: item.itemName
+        }));
+        setItemOptions(formattedItems);
       }
-    };
-  }, [claims]);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      setError("Failed to load items");
+    }
+  };
+
+  const fetchClaims = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("/api/claims/getAllClaims");
+      console.log('Claims fetched:', response.data);
+      if (response.data) {
+        setClaims(Array.isArray(response.data) ? response.data : []);
+      }
+    } catch (error) {
+      console.error("Error fetching claims:", error);
+      setError("Failed to load claims");
+      setClaims([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
+    if (!formData.itemId) {
+      setError('Please select an item');
+      return;
+    }
+
     try {
-      const response = await axios.post(
+      const response = await api.post(
         `/api/claims/createClaim/${formData.itemId}`,
-        formData
+        {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          studEmail: formData.studEmail,
+          dateClaimed: formData.dateClaimed
+        }
       );
-      setClaims([...claims, response.data]);
+      
+      console.log('Claim created:', response.data);
+      
       setOpen(false);
       setFormData({
         firstName: "",
         lastName: "",
         studEmail: "",
         dateClaimed: "",
-        itemId: "", // Reset the selected item
+        itemId: "",
       });
+      fetchClaims();
+      
     } catch (error) {
       console.error("Error creating claim:", error);
+      setError(error.response?.data || "Failed to create claim");
     }
+  };
+
+  const handleDeleteClick = (claim) => {
+    setClaimToDelete(claim);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!claimToDelete) return;
+
+    try {
+      await api.delete(`/api/claims/deleteClaim/${claimToDelete.claimId}`);
+      console.log('Claim deleted:', claimToDelete.claimId);
+      setDeleteConfirmOpen(false);
+      setClaimToDelete(null);
+      fetchClaims(); // Refresh the claims list
+    } catch (error) {
+      console.error("Error deleting claim:", error);
+      setError(error.response?.data || "Failed to delete claim");
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString();
   };
 
   return (
     <div>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" gutterBottom color="black">
         Claim Log
       </Typography>
-      <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
+      
+      {error && (
+        <Typography color="error" sx={{ mb: 2 }}>
+          Error: {error}
+        </Typography>
+      )}
+
+      <Button 
+        variant="contained" 
+        color="primary" 
+        onClick={() => setOpen(true)}
+        sx={{ mb: 3 }}
+      >
         Add Claim
       </Button>
-      {Array.isArray(claims) && (
-        <TableContainer component={Paper} style={{ marginTop: 20 }}>
-          <Table>
-            <TableHead>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>First Name</TableCell>
+              <TableCell>Last Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Item</TableCell>
+              <TableCell>Date Claimed</TableCell>
+              <TableCell>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
               <TableRow>
-                <TableCell>First Name</TableCell>
-                <TableCell>Last Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Date Claimed</TableCell>
+                <TableCell colSpan={6} align="center">Loading claims...</TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {claims.map((claim) => (
-                <TableRow key={claim.claimId}>
+            ) : claims.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center">No claims found</TableCell>
+              </TableRow>
+            ) : (
+              claims.map((claim, index) => (
+                <TableRow key={claim.claimId || index}>
                   <TableCell>{claim.firstName}</TableCell>
                   <TableCell>{claim.lastName}</TableCell>
                   <TableCell>{claim.studEmail}</TableCell>
-                  <TableCell>{claim.dateClaimed}</TableCell>
+                  <TableCell>{claim.item?.itemName || 'Unknown Item'}</TableCell>
+                  <TableCell>{formatDate(claim.dateClaimed)}</TableCell>
+                  <TableCell>
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDeleteClick(claim)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
+      {/* Add Claim Modal */}
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box
           sx={{
@@ -119,6 +231,24 @@ const ClaimLog = () => {
           <Typography variant="h6" gutterBottom>
             Add Claim
           </Typography>
+          
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="item-select-label">Item</InputLabel>
+            <Select
+              labelId="item-select-label"
+              label="Item"
+              name="itemId"
+              value={formData.itemId}
+              onChange={handleInputChange}
+            >
+              {itemOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <TextField
             fullWidth
             margin="normal"
@@ -143,32 +273,64 @@ const ClaimLog = () => {
             value={formData.studEmail}
             onChange={handleInputChange}
           />
-          <Select
-            fullWidth
-            margin="normal"
-            label="Item ID"
-            name="itemId"
-            value={formData.itemId}
-            onChange={handleInputChange}
-            renderValue={(selected) => selected && selected.value}
-          >
-            {itemOptions.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
           <TextField
             fullWidth
             margin="normal"
             label="Date Claimed"
             name="dateClaimed"
+            type="date"
+            InputLabelProps={{ shrink: true }}
             value={formData.dateClaimed}
             onChange={handleInputChange}
           />
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={handleSubmit}
+            sx={{ mt: 2 }}
+            disabled={!formData.itemId}
+          >
             Create Claim
           </Button>
+        </Box>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" gutterBottom color="black">
+            Confirm Delete
+          </Typography>
+          <Typography color="black">
+            Are you sure you want to delete this claim?
+          </Typography>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={() => setDeleteConfirmOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleDeleteConfirm}
+            >
+              Delete
+            </Button>
+          </Box>
         </Box>
       </Modal>
     </div>
