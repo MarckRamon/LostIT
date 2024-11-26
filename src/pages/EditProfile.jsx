@@ -9,7 +9,7 @@ import {
   TextField,
   IconButton,
 } from '@mui/material';
-import { Edit as EditIcon, Save as SaveIcon, PhotoCamera } from '@mui/icons-material';
+import { Edit as EditIcon, Save as SaveIcon, Delete as DeleteIcon, PhotoCamera } from '@mui/icons-material';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -97,6 +97,26 @@ function EditProfile() {
       }
     }
   };
+
+  const handleRemoveProfilePicture = async () => {
+    try {
+      if (user && user.adminId) {
+        await axios.delete(`http://localhost:8080/api/admins/removeProfilePicture/${user.adminId}`);
+        
+        // Update the local state
+        setProfilePicturePreview(null);
+        
+        // Update the user context
+        const updatedUser = { ...user, profilePicture: null };
+        updateUser(updatedUser);
+        
+        alert('Profile picture removed successfully!');
+      }
+    } catch (error) {
+      console.error('Error removing profile picture:', error);
+      alert('Failed to remove profile picture');
+    }
+  };
   
   const updateAdminDetails = async () => {
     if (userInfo.password !== userInfo.confirmPassword) {
@@ -178,6 +198,25 @@ function EditProfile() {
               <PhotoCamera fontSize="small" />
             </IconButton>
           </label>
+
+          {profilePicturePreview && (
+            <IconButton 
+              onClick={handleRemoveProfilePicture}
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                bgcolor: 'error.main',
+                color: 'white',
+                '&:hover': { bgcolor: 'error.dark' },
+                width: 30,
+                height: 30
+              }}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          )}
+
         </Box>
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h5">{userInfo.firstName} {userInfo.lastName}</Typography>

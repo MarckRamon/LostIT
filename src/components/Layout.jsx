@@ -21,6 +21,7 @@ import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
   Inventory as InventoryIcon,
+  FactCheck as FactCheckIcon,
   AccountCircle as AccountCircleIcon,
   Logout as LogoutIcon,
   Brightness4 as DarkModeIcon,
@@ -63,7 +64,7 @@ function Layout({ children }) {
   const menuItems = [
     { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/' },
     { text: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
-    { text: 'Claim Logs', icon: <InventoryIcon />, path: '/claim-log'},
+    { text: 'Claim Logs', icon: <FactCheckIcon/>, path: '/claim-log'},
   ];
 
   const drawer = (
