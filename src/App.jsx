@@ -10,6 +10,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ClaimLog from './pages/ClaimLog';
+import UserLostItemReport from './pages/UserLostItemReport'; // Add this import
 
 const theme = createTheme({
   palette: {
@@ -80,6 +81,14 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <EditProfile/>
+                </Layout>
+              </ProtectedRoute>
+            } />
+            {/* New route for Users page */}
+            <Route path="/users" element={
+              <ProtectedRoute>
+                <Layout>
+                  <UserLostItemReport />
                 </Layout>
               </ProtectedRoute>
             } />

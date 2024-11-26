@@ -21,6 +21,7 @@ import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
   Inventory as InventoryIcon,
+  People as PeopleIcon,
   AccountCircle as AccountCircleIcon,
   Logout as LogoutIcon,
   Brightness4 as DarkModeIcon,
@@ -64,6 +65,7 @@ function Layout({ children }) {
     { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/' },
     { text: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
     { text: 'Claim Logs', icon: <InventoryIcon />, path: '/claim-log'},
+    { text: 'Users', icon: <PeopleIcon />, path: '/users' }, // New Users menu item
   ];
 
   const drawer = (
