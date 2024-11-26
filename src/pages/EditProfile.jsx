@@ -9,12 +9,12 @@ import {
   TextField,
   IconButton,
 } from '@mui/material';
-import { Edit as EditIcon, Save as SaveIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Save as SaveIcon, PhotoCamera } from '@mui/icons-material';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext'; // Assuming you use an AuthContext
+import { useAuth } from '../context/AuthContext';
 
 function EditProfile() {
-  const { user, updateUser } = useAuth(); // Access current user and updateUser from AuthContext
+  const { user, updateUser } = useAuth();
   const [userInfo, setUserInfo] = useState({
     email: '',
     firstName: '',
@@ -23,6 +23,7 @@ function EditProfile() {
     password: '',
     confirmPassword: '',
     phoneNumber: '',
+    profilePicture: null,
   });
 
   const [editState, setEditState] = useState({
@@ -33,12 +34,11 @@ function EditProfile() {
     password: false,
   });
 
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null);
+
   // Fetch user details when component mounts
   useEffect(() => {
-    console.log("Current user in EditProfile:", user); // Debug log
-    
     if (user) {
-      console.log("Setting user info with:", user); // Debug log
       setUserInfo({
         email: user.email || '',
         firstName: user.firstName || '',
@@ -47,10 +47,56 @@ function EditProfile() {
         password: '',
         confirmPassword: '',
         phoneNumber: user.phoneNumber || '',
+        profilePicture: user.profilePicture || null,
       });
+
+      // Fetch and set profile picture
+      fetchProfilePicture();
     }
   }, [user]);
 
+  const fetchProfilePicture = async () => {
+    try {
+      if (user && user.adminId) {
+        const response = await axios.get(`http://localhost:8080/api/admins/getProfilePicture/${user.adminId}`);
+        setProfilePicturePreview(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching profile picture:', error);
+    }
+  };
+
+  const handleProfilePictureUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        await axios.post(
+          `http://localhost:8080/api/admins/uploadProfilePicture/${user.adminId}`, 
+          formData, 
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+
+        // Read and preview the uploaded image
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProfilePicturePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+        alert('Profile picture uploaded successfully!');
+      } catch (error) {
+        console.error('Error uploading profile picture:', error);
+        alert('Failed to upload profile picture');
+      }
+    }
+  };
   
   const updateAdminDetails = async () => {
     if (userInfo.password !== userInfo.confirmPassword) {
@@ -63,17 +109,10 @@ function EditProfile() {
         return;
       }
   
-      
-      console.log("Current user:", user);
-      console.log("User info being sent:", userInfo);
-      console.log("Admin ID being used:", user.adminId);
-  
       const response = await axios.put(
-        `http://localhost:8080/api/admins/updateAdminDetails/${user.adminId}`,  // added full URL kay di mogana basta di
+        `http://localhost:8080/api/admins/updateAdminDetails/${user.adminId}`,
         userInfo
       );
-  
-      console.log("Response received:", response);  
   
       if (response.status === 200) {
         updateUser(response.data);
@@ -89,11 +128,7 @@ function EditProfile() {
         alert('Failed to update profile. Please try again.');
       }
     } catch (error) {
-      // More detailed error logging
-      console.error('Full error object:', error);
-      console.error('Error response data:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      console.error('Error message:', error.message);
+      console.error('Error updating profile:', error);
       alert(`Error updating profile: ${error.response?.data?.message || error.message}`);
     }
   };
@@ -113,18 +148,41 @@ function EditProfile() {
       </Typography>
       {/* Profile Header */}
       <Card sx={{ mb: 3, p: 2, display: 'flex', alignItems: 'center', boxShadow: 2 }}>
-        <Avatar
-          alt="Anzy"
-          src="/path/to/avatar.jpg"
-          sx={{ width: 80, height: 80, mr: 3 }}
-        />
+        <Box sx={{ position: 'relative', mr: 3 }}>
+          <Avatar
+            alt="Profile Picture"
+            src={profilePicturePreview || "/path/to/default-avatar.jpg"}
+            sx={{ width: 80, height: 80 }}
+          />
+          <input
+            accept="image/*"
+            style={{ display: 'none' }}
+            id="profile-picture-upload"
+            type="file"
+            onChange={handleProfilePictureUpload}
+          />
+          <label htmlFor="profile-picture-upload">
+            <IconButton 
+              component="span" 
+              sx={{ 
+                position: 'absolute', 
+                bottom: 0, 
+                right: 0, 
+                bgcolor: 'primary.main', 
+                color: 'white', 
+                '&:hover': { bgcolor: 'primary.dark' },
+                width: 30,
+                height: 30 
+              }}
+            >
+              <PhotoCamera fontSize="small" />
+            </IconButton>
+          </label>
+        </Box>
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h5">{userInfo.firstName} {userInfo.lastName}</Typography>
-          <Typography variant="body2" color="text.secondary">{userInfo.bio}</Typography>
+          <Typography variant="body2" color="text.secondary">{userInfo.username}</Typography>
         </Box>
-        <IconButton>
-          <EditIcon />
-        </IconButton>
       </Card>
       <Card sx={{ p: 2, boxShadow: 2 }}>
         <Grid container spacing={2}>
@@ -145,27 +203,25 @@ function EditProfile() {
                   {editState[field] ? <SaveIcon /> : <EditIcon />}
                 </IconButton>
               </Box>
+              {field === 'password' && editState[field] && (
+                <TextField
+                  fullWidth
+                  type="password"
+                  label="Confirm Password"
+                  value={userInfo.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  sx={{ mt: 2 }}
+                />
+              )}
             </Grid>
           ))}
-          {/* Confirm Password Field */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              type="password"
-              label="Confirm Password"
-              value={userInfo.confirmPassword}
-              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-            />
-          </Grid>
         </Grid>
-        <Box sx={{ mt: 3, textAlign: 'right' }}>
-          <Button
-            variant="contained"
-            color="primary"
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+          <Button 
+            variant="contained" 
+            color="primary" 
             onClick={updateAdminDetails}
-            disabled={
-              !Object.values(editState).some((isEditing) => isEditing) // Enable Save Changes only if any field is editable
-            }
+            sx={{ px: 4 }}
           >
             Save Changes
           </Button>
