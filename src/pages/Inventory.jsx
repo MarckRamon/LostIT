@@ -57,22 +57,22 @@ function Inventory() {
   const [successMessage, setSuccessMessage] = useState('');
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null); 
-  const [selectedLocation, setSelectedLocation] = useState(null); 
-  const [selectedStatus, setSelectedStatus] = useState(''); 
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState('');
 
   const handleCategoryChange = (event) => {
-   const value = event.target.value;
-   console.log('Selected Category value: ', value);
-   setSelectedCategory(value === '' ? null : value);
+    const value = event.target.value;
+    console.log('Selected Category value: ', value);
+    setSelectedCategory(value === '' ? null : value);
   };
-  
+
   const handleLocationChange = (event) => {
     const value = event.target.value;
     console.log('Selected Location value: ', value);
     setSelectedLocation(value === '' ? null : value);
   };
-  
+
 
 
   useEffect(() => {
@@ -259,22 +259,66 @@ function Inventory() {
     }
   };
 
-  
+  const handleDeleteCategory = async (categoryId) => {
+    if (window.confirm('Are you sure you want to delete this category? This will also remove all items associated with this category.')) {
+      try {
+        setLoading(true);
+        await axiosInstance.delete(`/api/categories/deleteCategory/${categoryId}`);
+        await fetchCategories();
+
+        // If the deleted category was the current selected category, reset it
+        if (Number(formData.category) === Number(categoryId)) {
+          setFormData({ ...formData, category: '' });
+        }
+
+        setSuccessMessage('Category deleted successfully!');
+      } catch (error) {
+        console.error("Error deleting category:", error);
+        setError(error.response?.data?.message || "Error deleting category. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleDeleteLocation = async (locationId) => {
+    if (window.confirm('Are you sure you want to delete this location? This will also remove all items associated with this location.')) {
+      try {
+        setLoading(true);
+        await axiosInstance.delete(`/api/locations/deleteLocation/${locationId}`);
+        await fetchLocations();
+        
+        // If the deleted location was the current selected location, reset it
+        if (Number(formData.location) === Number(locationId)) {
+          setFormData({ ...formData, location: '' });
+        }
+        
+        setSuccessMessage('Location deleted successfully!');
+      } catch (error) {
+        console.error("Error deleting location:", error);
+        setError(error.response?.data?.message || "Error deleting location. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+
   const filteredItems = items.filter(item => {
-    const matchesSearchTerm = 
+    const matchesSearchTerm =
       item.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchTerm.toLowerCase());
-  
-    const matchesCategory = selectedCategory === null || selectedCategory === '' 
-    ? true
-    : Number(item.categoryId) === Number(selectedCategory);
+
+    const matchesCategory = selectedCategory === null || selectedCategory === ''
+      ? true
+      : Number(item.categoryId) === Number(selectedCategory);
 
     const matchesLocation = selectedLocation === null || selectedLocation === ''
-    ? true
-    : Number(item.locationId) === Number(selectedLocation);
+      ? true
+      : Number(item.locationId) === Number(selectedLocation);
 
     const matchesStatus = selectedStatus ? item.status === selectedStatus : true;
-  
+
     return matchesSearchTerm && matchesCategory && matchesLocation && matchesStatus;
   });
 
@@ -364,7 +408,7 @@ function Inventory() {
         <FormControl sx={{ minWidth: 120, mx: 1 }}>
           <InputLabel>Category</InputLabel>
           <Select
-            value={selectedCategory || null} 
+            value={selectedCategory || null}
             onChange={handleCategoryChange}
             label="Category"
           >
@@ -372,9 +416,9 @@ function Inventory() {
               <em>All</em>
             </MenuItem>
             {categories.map((category) => (
-              <MenuItem 
-              key={category.id || category.categoryId} 
-              value={category.id || category.categoryId}
+              <MenuItem
+                key={category.id || category.categoryId}
+                value={category.id || category.categoryId}
               >
                 {category.name || category.categoryName}
               </MenuItem>
@@ -385,7 +429,7 @@ function Inventory() {
         <FormControl sx={{ minWidth: 120, mx: 1 }}>
           <InputLabel>Location</InputLabel>
           <Select
-            value={selectedLocation || null} 
+            value={selectedLocation || null}
             onChange={handleLocationChange}
             label="Location"
           >
@@ -393,8 +437,8 @@ function Inventory() {
               <em>All</em>
             </MenuItem>
             {locations.map((location) => (
-              <MenuItem 
-                key={location.id || location.locationId} 
+              <MenuItem
+                key={location.id || location.locationId}
                 value={location.id || location.locationId}
               >
                 {location.name || `${location.locationBuilding} - ${location.locationFloor}` || location.locationName}
@@ -402,12 +446,12 @@ function Inventory() {
             ))}
           </Select>
         </FormControl>
-        <FormControl sx={{ minWidth: 120, mx: 1}}>
+        <FormControl sx={{ minWidth: 120, mx: 1 }}>
           <InputLabel>Status</InputLabel>
           <Select
-            value = {selectedStatus}
+            value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            label = "Status"
+            label="Status"
           >
             <MenuItem value="">
               <em>All</em>
@@ -458,7 +502,7 @@ function Inventory() {
                   <TableCell>{item.status || 'N/A'}</TableCell>
                   <TableCell>{item.date || 'N/A'}</TableCell>
                   <TableCell>
-                      <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
+                    <IconButton onClick={() => handleOpenDialog(item)} disabled={loading}>
                       <EditIcon />
                     </IconButton>
                     <IconButton onClick={() => handleDelete(item.itemId)} disabled={loading}>
@@ -498,31 +542,49 @@ function Inventory() {
           />
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel id="category-label">Category</InputLabel>
-            <Select
-              labelId="category-label"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              required
-              label="Category"
-            >
-              {categories.map((category) => (
-                <MenuItem
-                  key={category.id || category.categoryId}
-                  value={category.id || category.categoryId}
-                >
-                  {category.name || category.categoryName}
-                </MenuItem>
-              ))}
-            </Select>
-            <Button
-              onClick={handleOpenCategoryDialog}
-              variant="contained"
-              color="primary"
-              sx={{ mt: 1 }}
-              disabled={loading}
-            >
-              Add Category
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Select
+                labelId="category-label"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                required
+                label="Category"
+                sx={{ flexGrow: 1, mr: 1 }}
+              >
+                {categories.map((category) => (
+                  <MenuItem
+                    key={category.id || category.categoryId}
+                    value={category.id || category.categoryId}
+                  >
+                    {category.name || category.categoryName}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Button
+                onClick={handleOpenCategoryDialog}
+                variant="contained"
+                color="primary"
+                sx={{ mr: 1 }}
+                disabled={loading}
+              >
+                Add
+              </Button>
+              <Button
+                onClick={() => {
+                  const categoryToDelete = formData.category;
+                  if (categoryToDelete) {
+                    handleDeleteCategory(categoryToDelete);
+                  } else {
+                    setError("Please select a category to delete");
+                  }
+                }}
+                variant="contained"
+                color="error"
+                disabled={loading || !formData.category}
+              >
+                Delete
+              </Button>
+            </Box>
           </FormControl>
 
           <TextField
@@ -535,31 +597,49 @@ function Inventory() {
 
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel id="location-label">Location</InputLabel>
-            <Select
-              labelId="location-label"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              required
-              label="Location"
-            >
-              {locations.map((location) => (
-                <MenuItem
-                  key={location.id || location.locationId}
-                  value={location.id || location.locationId}
-                >
-                  {location.name || `${location.locationBuilding} - ${location.locationFloor}` || location.locationName}
-                </MenuItem>
-              ))}
-            </Select>
-            <Button
-              onClick={handleOpenLocationDialog}
-              variant="contained"
-              color="primary"
-              sx={{ mt: 1 }}
-              disabled={loading}
-            >
-              Add Location
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Select
+                labelId="location-label"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                required
+                label="Location"
+                sx={{ flexGrow: 1, mr: 1 }}
+              >
+                {locations.map((location) => (
+                  <MenuItem
+                    key={location.id || location.locationId}
+                    value={location.id || location.locationId}
+                  >
+                    {location.name || `${location.locationBuilding} - ${location.locationFloor}` || location.locationName}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Button
+                onClick={handleOpenLocationDialog}
+                variant="contained"
+                color="primary"
+                sx={{ mr: 1 }}
+                disabled={loading}
+              >
+                Add
+              </Button>
+              <Button
+                onClick={() => {
+                  const locationToDelete = formData.location;
+                  if (locationToDelete) {
+                    handleDeleteLocation(locationToDelete);
+                  } else {
+                    setError("Please select a location to delete");
+                  }
+                }}
+                variant="contained"
+                color="error"
+                disabled={loading || !formData.location}
+              >
+                Delete
+              </Button>
+            </Box>
           </FormControl>
 
           <FormControl fullWidth sx={{ mb: 2 }}>
