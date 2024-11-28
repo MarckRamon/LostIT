@@ -62,7 +62,7 @@ function Layout({ children }) {
   };
 
   const menuItems = [
-    { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/' },
+    { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
     { text: 'Claim Logs', icon: <InventoryIcon />, path: '/claim-log'},
   ];
@@ -85,7 +85,7 @@ function Layout({ children }) {
           variant="h6" 
           noWrap 
           component="div" 
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard')}
           sx={{ 
             cursor: 'pointer',
             fontWeight: 600,

@@ -61,7 +61,7 @@ function App() {
               path="/"
               element={<Navigate to="/users" replace />}
             />
-            <Route path="/" element={
+            <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout>
                   <Dashboard />

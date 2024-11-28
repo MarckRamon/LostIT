@@ -90,7 +90,7 @@ const Login = () => {
       phoneNumber: user.phoneNumber
     });
     console.log("Logged in with user data:", user);
-    navigate('/');
+    navigate('/dashboard');
   };
 
   const handleUsernameChange = (e) => {
