@@ -14,6 +14,7 @@ import {
   TextField,
   IconButton,
   LinearProgress,
+  useTheme,
 } from '@mui/material';
 import {
   Devices as ElectronicsIcon,
@@ -34,6 +35,7 @@ import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosInstance';
 
 function Dashboard() {
+  const theme = useTheme();
   const { user, updateUser } = useAuth();
   const [openDialog, setOpenDialog] = useState(false);
   const [userInfo, setUserInfo] = useState({
@@ -104,7 +106,7 @@ function Dashboard() {
         'Tools': 0
       };
   
-      let maxItemCount = 0;
+      let maxItemCount = 100;
   
       // Count items per category
       items.forEach(item => {
@@ -136,7 +138,7 @@ function Dashboard() {
   };
 
   const StatCard = ({ icon: Icon, title, value, color }) => (
-    <Card sx={{ height: '100%', bgcolor: 'white', boxShadow: 2 }}>
+    <Card sx={{ height: '100%', bgcolor: theme.palette.mode === 'dark' ? '#121212' : 'white', boxShadow: 2 }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
@@ -165,7 +167,7 @@ function Dashboard() {
   );
 
   return (
-    <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+    <Box sx={{ p: 3, bgcolor: theme.palette.mode === 'dark' ? '#121212' : 'white', minHeight: '100vh' }}>
     
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={4}>

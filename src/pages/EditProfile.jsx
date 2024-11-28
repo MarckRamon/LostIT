@@ -8,12 +8,14 @@ import {
   Avatar,
   TextField,
   IconButton,
+  useTheme,
 } from '@mui/material';
 import { Edit as EditIcon, Save as SaveIcon, Delete as DeleteIcon, PhotoCamera } from '@mui/icons-material';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 function EditProfile() {
+  const theme = useTheme();
   const { user, updateUser } = useAuth();
   const [userInfo, setUserInfo] = useState({
     email: '',
@@ -103,7 +105,7 @@ function EditProfile() {
       if (user && user.adminId) {
         await axios.delete(`http://localhost:8080/api/admins/removeProfilePicture/${user.adminId}`);
         
-        // Update the local state
+        // Removes profile pic
         setProfilePicturePreview(null);
         
         // Update the user context
@@ -162,8 +164,8 @@ function EditProfile() {
   };
 
   return (
-    <Box sx={{ p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'black' }}>
+    <Box sx={{ p: 3, bgcolor: theme.palette.mode === 'dark' ? '#121212' : 'f5f5f5', minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.mode === 'dark' ? 'white' : 'black' }}>  
         My Profile
       </Typography>
       {/* Profile Header */}
