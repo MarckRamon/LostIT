@@ -65,7 +65,6 @@ function Layout({ children }) {
     { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/' },
     { text: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
     { text: 'Claim Logs', icon: <InventoryIcon />, path: '/claim-log'},
-    { text: 'Users', icon: <PeopleIcon />, path: '/users' }, // New Users menu item
   ];
 
   const drawer = (

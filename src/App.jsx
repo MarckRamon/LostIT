@@ -10,7 +10,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ClaimLog from './pages/ClaimLog';
-import UserLostItemReport from './pages/UserLostItemReport'; // Add this import
+import UserLostItemReport from './pages/UserLostItemReport';
 
 const theme = createTheme({
   palette: {
@@ -56,6 +56,11 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/users" element={<UserLostItemReport />} />
+            <Route
+              path="/"
+              element={<Navigate to="/users" replace />}
+            />
             <Route path="/" element={
               <ProtectedRoute>
                 <Layout>
@@ -84,14 +89,7 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
-            {/* New route for Users page */}
-            <Route path="/users" element={
-              <ProtectedRoute>
-                <Layout>
-                  <UserLostItemReport />
-                </Layout>
-              </ProtectedRoute>
-            } />
+            
           </Routes>
         </Router>
       </AuthProvider>

@@ -9,9 +9,14 @@ import {
   FormControl, 
   InputLabel, 
   Container, 
-  Paper 
+  Paper,
+  Grid,
+  Divider
 } from '@mui/material';
-import Layout from '../components/Layout'; // Adjust the import path as needed
+import { useNavigate } from 'react-router-dom';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LostITLogo from '/LostITbg.png';
+import { IconButton } from '@mui/material';
 
 const categories = [
   'Electronics', 
@@ -26,11 +31,11 @@ function UserLostItemReport() {
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Here you would typically send the data to your backend
     const reportData = {
       itemName,
       category,
@@ -40,108 +45,234 @@ function UserLostItemReport() {
 
     console.log('Lost Item Report Submitted:', reportData);
     
-    // Reset form after submission
     setItemName('');
     setCategory('');
     setLocation('');
     setDescription('');
+  };
 
-    // TODO: Add actual submission logic (e.g., API call)
-    // TODO: Add success/error notification
+  const handleUserIconClick = () => {
+    navigate('/login');
   };
 
   return (
-    <Layout>
-      <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Paper 
-          elevation={3} 
+    <Box 
+      sx={{ 
+        backgroundColor: '#f3f3f3', 
+        minHeight: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column',
+        position: 'relative' 
+      }}
+    >
+      {/* Windows 11 Style Taskbar */}
+      <Box 
+        sx={{ 
+          backgroundColor: 'white', 
+          height: '48px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          px: 2, 
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)' 
+        }}
+      >
+        <img 
+          src={LostITLogo} 
+          alt="LostIT Logo" 
+          style={{ height: '40px', marginRight: '16px' }} 
+        />
+        <Box sx={{ flexGrow: 1 }}></Box>
+        <IconButton 
+          onClick={handleUserIconClick}
           sx={{ 
-            p: 4, 
-            mt: 2, 
-            borderRadius: 2 
+            color: '#0078D7',
+            '&:hover': {
+              backgroundColor: 'rgba(0,0,0,0.05)'
+            }
           }}
         >
-          <Typography 
-            variant="h4" 
-            gutterBottom 
-            sx={{ 
-              mb: 3, 
-              textAlign: 'center',
-              background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
-              backgroundClip: 'text',
-              textFillColor: 'transparent'
-            }}
-          >
-            Report a Lost Item
-          </Typography>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Item Name"
-              variant="outlined"
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
-              required
-              sx={{ mb: 2 }}
-            />
-            
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={category}
-                label="Category"
-                onChange={(e) => setCategory(e.target.value)}
-                required
-              >
-                {categories.map((cat) => (
-                  <MenuItem key={cat} value={cat}>
-                    {cat}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            
-            <TextField
-              fullWidth
-              label="Location Found"
-              variant="outlined"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              required
-              sx={{ mb: 2 }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Description"
-              variant="outlined"
-              multiline
-              rows={4}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              sx={{ mb: 2 }}
-              placeholder="Provide additional details about the found item..."
-            />
-            
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
+          <AccountCircleIcon />
+        </IconButton>
+      </Box>
+
+      <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1, position: 'relative' }}>
+        {/* Blurred Background Image */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage: 'url(/win11.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(8px)',
+            zIndex: 0,
+            opacity: 0.5,
+            backgroundColor: '#f0f0f0'
+          }}
+        />
+
+        <Grid 
+          container 
+          spacing={4} 
+          sx={{ 
+            position: 'relative', 
+            zIndex: 1 
+          }}
+        >
+          {/* Information Section */}
+          <Grid item xs={12} md={5}>
+            <Paper 
+              elevation={3} 
               sx={{ 
-                mt: 2,
-                py: 1.5,
-                background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
-                '&:hover': {
-                  opacity: 0.9
-                }
+                p: 4, 
+                borderRadius: 2, 
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                height: '100%',
+                backdropFilter: 'blur(10px)'
               }}
             >
-              Submit Lost Item Report
-            </Button>
-          </form>
-        </Paper>
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  mb: 3, 
+                  color: '#0078D7', 
+                  fontWeight: 'bold' 
+                }}
+              >
+                LostIT: Reconnecting People with Lost Items
+              </Typography>
+              
+              <Typography variant="body1" paragraph>
+                LostIT is a community-driven platform designed to help you recover lost items quickly and easily. Our mission is to reunite people with their valuable possessions through a simple, user-friendly reporting system.
+              </Typography>
+              
+              <Divider sx={{ my: 2 }} />
+              
+              <Typography variant="h6" sx={{ color: '#0078D7', mb: 2 }}>
+                How It Works
+              </Typography>
+              
+              <Typography variant="body2">
+                1. Report a lost or found item with detailed information
+                2. Our system matches and notifies potential owners
+                3. Safely connect and recover your lost belongings
+              </Typography>
+            </Paper>
+          </Grid>
+
+          {/* Report Form Section */}
+          <Grid item xs={12} md={7}>
+            <Paper 
+              elevation={3} 
+              sx={{ 
+                p: 4, 
+                borderRadius: 2, 
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(10px)'
+              }}
+            >
+              <Typography 
+                variant="h5" 
+                sx={{ 
+                  mb: 3, 
+                  textAlign: 'center', 
+                  color: '#0078D7' 
+                }}
+              >
+                Report a Lost Item
+              </Typography>
+              
+              <form onSubmit={handleSubmit}>
+                <TextField
+                  fullWidth
+                  label="Item Name"
+                  variant="outlined"
+                  value={itemName}
+                  onChange={(e) => setItemName(e.target.value)}
+                  required
+                  sx={{ mb: 2 }}
+                />
+                
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <InputLabel>Category</InputLabel>
+                  <Select
+                    value={category}
+                    label="Category"
+                    onChange={(e) => setCategory(e.target.value)}
+                    required
+                  >
+                    {categories.map((cat) => (
+                      <MenuItem key={cat} value={cat}>
+                        {cat}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                
+                <TextField
+                  fullWidth
+                  label="Location Found"
+                  variant="outlined"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  required
+                  sx={{ mb: 2 }}
+                />
+                
+                <TextField
+                  fullWidth
+                  label="Description"
+                  variant="outlined"
+                  multiline
+                  rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  sx={{ mb: 2 }}
+                  placeholder="Provide additional details about the found item..."
+                />
+                
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  sx={{ 
+                    mt: 2,
+                    py: 1.5,
+                    backgroundColor: '#0078D7',
+                    '&:hover': {
+                      backgroundColor: '#005A9C'
+                    }
+                  }}
+                >
+                  Submit Lost Item Report
+                </Button>
+              </form>
+            </Paper>
+          </Grid>
+        </Grid>
       </Container>
-    </Layout>
+
+      {/* Windows 11 Style Footer */}
+      <Box 
+        sx={{ 
+          backgroundColor: 'white', 
+          height: '48px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          boxShadow: '0 -1px 3px rgba(0,0,0,0.1)' 
+        }}
+      >
+        <Typography variant="body2" color="textSecondary">
+          © 2024 LostIT. All rights reserved.
+        </Typography>
+      </Box>
+    </Box>
   );
 }
 
