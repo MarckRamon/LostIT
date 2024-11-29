@@ -1,7 +1,34 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Box, Drawer, AppBar, Toolbar, List, Typography, Divider, IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText, ThemeProvider, createTheme, CssBaseline, Avatar } from '@mui/material';
-import { Menu as MenuIcon, Dashboard as DashboardIcon, Inventory as InventoryIcon, FactCheck as FactCheckIcon, AccountCircle as AccountCircleIcon, Logout as LogoutIcon, Brightness4 as DarkModeIcon, Brightness7 as LightModeIcon } from '@mui/icons-material';
+import {
+  Box,
+  Drawer,
+  AppBar,
+  Toolbar,
+  List,
+  Typography,
+  Divider,
+  IconButton,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
+  Avatar, // Added Avatar import
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  Dashboard as DashboardIcon,
+  Inventory as InventoryIcon,
+  People as PeopleIcon,
+  AccountCircle as AccountCircleIcon,
+  Logout as LogoutIcon,
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon,
+  FactCheck as FactCheckIcon, // Added FactCheckIcon import
+} from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
@@ -55,162 +82,115 @@ function Layout({ children }) {
   };
 
   const menuItems = [
-    { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/' },
+    { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
     { text: 'Claim Logs', icon: <FactCheckIcon />, path: '/claim-log' },
   ];
 
   const drawer = (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Box>
-        <Toolbar sx={{ display: 'flex', alignItems: 'left', justifyContent: 'left' }}>
-          <Box
-            component="img"
-            src="/LostITbg.png"
-            alt="LostIT Logo"
+    <>
+      <Toolbar sx={{ display: 'flex', alignItems: 'left', justifyContent: 'left'}}>
+        <Box
+          component="img"
+          src="/LostITbg.png"
+          alt="LostIT Logo"
+          sx={{ 
+            height: 48, 
+            width: 48,
+            ml: -0.5,
+            objectFit: 'contain'
+          }}
+        />
+        <Typography 
+          variant="h6" 
+          noWrap 
+          component="div" 
+          onClick={() => navigate('/dashboard')}
+          sx={{ 
+            cursor: 'pointer',
+            fontWeight: 600,
+            fontSize: '1.5rem',
+            background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
+            '&:hover': {
+              opacity: 0.8
+            }
+          }}
+        >
+          LostIT
+        </Typography>
+      </Toolbar>
+      <Divider sx={{ opacity: 0.1 }} />
+      <List sx={{ px: 2, py: 1, flexGrow: 1 }}>
+        {/* Profile and Logout items */}
+        <ListItem disablePadding sx={{ mb: 1 }}>
+          <ListItemButton
+            onClick={() => navigate('/edit-profile')}
             sx={{
-              height: 48,
-              width: 48,
-              ml: -0.5,
-              objectFit: 'contain',
-            }}
-          />
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            onClick={() => navigate('/')}
-            sx={{
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '1.5rem',
-              background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
-              backgroundClip: 'text',
-              textFillColor: 'transparent',
+              borderRadius: 2,
               '&:hover': {
-                opacity: 0.8,
+                bgcolor: 'action.hover',
               },
             }}
           >
-            LostIT
-          </Typography>
-        </Toolbar>
-        <Divider sx={{ opacity: 0.1 }} />
-        <List sx={{ px: 2, py: 1 }}>
-          {menuItems.map((item) => (
-            <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
-              <ListItemButton
-                selected={location.pathname === item.path}
-                onClick={() => navigate(item.path)}
-                sx={{
-                  borderRadius: 2,
-                  '&.Mui-selected': {
-                    bgcolor: 'primary.main',
-                    color: 'white',
-                    '&:hover': {
-                      bgcolor: 'primary.dark',
-                    },
-                    '& .MuiListItemIcon-root': {
-                      color: 'white',
-                    },
-                  },
-                  '&:hover': {
-                    bgcolor: 'action.hover',
-                  },
-                }}
-              >
-                <ListItemIcon
+            <ListItemIcon
+              sx={{
+                minWidth: 40,
+                color: 'primary.main',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {profilePicture ? (
+                <Avatar
+                  src={profilePicture}
+                  alt="Profile"
                   sx={{
-                    minWidth: 40,
-                    color: location.pathname === item.path ? 'white' : 'primary.main',
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  primaryTypographyProps={{
-                    fontSize: '0.9rem',
-                    fontWeight: location.pathname === item.path ? 600 : 400,
+                    width: 32,
+                    height: 32,
+                    border: '2px solid',
+                    borderColor: 'primary.main',
+                    mr: 1.5,
                   }}
                 />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-        <Divider sx={{ opacity: 0.1 }} />
-      </Box>
-      
-      <Box sx={{ mt: 'auto', px: 2, py: 1 }}>
-        <List>
-          <ListItem disablePadding sx={{ mb: 1 }}>
-            <ListItemButton
-              onClick={() => navigate('/edit-profile')}
-              sx={{
-                borderRadius: 2,
-                '&:hover': {
-                  bgcolor: 'action.hover',
-                },
+              ) : (
+                <AccountCircleIcon />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary="Profile"
+              primaryTypographyProps={{
+                fontSize: '0.9rem',
               }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 40,
-                  color: 'primary.main',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {profilePicture ? (
-                  <Avatar
-                    src={profilePicture}
-                    alt="Profile"
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      border: '2px solid',
-                      borderColor: 'primary.main',
-                      mr: 1.5,
-                    }}
-                  />
-                ) : (
-                  <AccountCircleIcon />
-                )}
-              </ListItemIcon>
-              <ListItemText
-                primary="Profile"
-                primaryTypographyProps={{
-                  fontSize: '0.9rem',
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton
-              onClick={handleLogout}
-              sx={{
-                borderRadius: 2,
-                '&:hover': {
-                  bgcolor: 'action.hover',
-                },
+            />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            onClick={handleLogout}
+            sx={{
+              borderRadius: 2,
+              '&:hover': {
+                bgcolor: 'action.hover',
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 40, color: 'error.main' }}>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Logout"
+              primaryTypographyProps={{
+                fontSize: '0.9rem',
+                color: 'error.main',
               }}
-            >
-              <ListItemIcon sx={{ minWidth: 40, color: 'error.main' }}>
-                <LogoutIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="Logout"
-                primaryTypographyProps={{
-                  fontSize: '0.9rem',
-                  color: 'error.main',
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Box>
-    </Box>
+            />
+          </ListItemButton>
+        </ListItem>
+      </List>
+    </>
   );
 
   return (

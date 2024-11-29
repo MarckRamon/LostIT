@@ -168,24 +168,11 @@ const Register = () => {
         bgcolor: '#000',
         overflow: 'hidden',
         cursor: 'default',
+        backgroundImage: 'url("/loginbg.jpg")', // Replace with your image path
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
       }}
     >
-      {/* Background Video */}
-      <video
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-        }}
-        autoPlay
-        muted
-        loop
-        id="bgVideo"
-      >
-        <source src="/win11.mp4" type="video/mp4" />
-      </video>
-
       {/* Blur Overlay */}
       <Box
         sx={{

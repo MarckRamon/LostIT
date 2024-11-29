@@ -90,7 +90,7 @@ const Login = () => {
       phoneNumber: user.phoneNumber
     });
     console.log("Logged in with user data:", user);
-    navigate('/');
+    navigate('/dashboard');
   };
 
   const handleUsernameChange = (e) => {
@@ -106,24 +106,11 @@ const Login = () => {
         bgcolor: '#000',
         overflow: 'hidden',
         cursor: 'default',
+        backgroundImage: 'url("/loginbg.jpg")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
       }}
     >
-      {/* Background Video */}
-      <video
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-        }}
-        autoPlay
-        muted
-        loop
-        playsInline
-      >
-        <source src="/win11.mp4" type="video/mp4" />
-      </video>
-
       {/* Blur Overlay */}
       <Box
         sx={{
@@ -134,6 +121,7 @@ const Login = () => {
         }}
       />
 
+      {/* Rest of the component remains the same as in the original code */}
       <Container maxWidth="sm" sx={{ height: '100vh', position: 'relative' }}>
         {/* Time and Date Display */}
         <Fade in={!showLoginForm} timeout={800}>
@@ -175,7 +163,7 @@ const Login = () => {
           </Stack>
         </Fade>
 
-        {/* Login Form */}
+        {/* Login Form - Remains the same as in the original code */}
         <Fade in={showLoginForm} timeout={800}>
           <Stack
             spacing={3}
@@ -193,6 +181,7 @@ const Login = () => {
               display: showLoginForm ? 'flex' : 'none',
             }}
           >
+            {/* Avatar, form, buttons - all remain the same */}
             <Avatar
               sx={{
                 width: 90,
