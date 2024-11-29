@@ -88,7 +88,11 @@ function Layout({ children }) {
   ];
 
   const drawer = (
-    <>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100%' 
+    }}>
       <Toolbar sx={{ display: 'flex', alignItems: 'left', justifyContent: 'left'}}>
         <Box
           component="img"
@@ -122,8 +126,9 @@ function Layout({ children }) {
         </Typography>
       </Toolbar>
       <Divider sx={{ opacity: 0.1 }} />
+      
+      {/* Main Menu Items */}
       <List sx={{ px: 2, py: 1, flexGrow: 1 }}>
-        {/* Menu Items */}
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
             <ListItemButton
@@ -148,7 +153,15 @@ function Layout({ children }) {
             </ListItemButton>
           </ListItem>
         ))}
+      </List>
 
+      {/* Bottom Section for Profile and Logout */}
+      <Box sx={{ 
+        mt: 'auto', 
+        pb: 2,
+        px: 2 
+      }}>
+        <Divider sx={{ mb: 2, opacity: 0.1 }} />
         {/* Profile Item */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
@@ -217,8 +230,8 @@ function Layout({ children }) {
             />
           </ListItemButton>
         </ListItem>
-      </List>
-    </>
+      </Box>
+    </Box>
   );
 
   // Rest of the component remains the same as in the previous version
