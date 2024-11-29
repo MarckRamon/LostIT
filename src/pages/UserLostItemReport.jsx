@@ -45,6 +45,7 @@ function UserLostItemReport() {
 
     console.log('Lost Item Report Submitted:', reportData);
     
+    // Reset form fields after submission
     setItemName('');
     setCategory('');
     setLocation('');
@@ -59,12 +60,32 @@ function UserLostItemReport() {
     <Box 
       sx={{ 
         backgroundColor: '#f3f3f3', 
-        minHeight: '100vh', 
+        height: '100vh', 
+        width: '100vw',
         display: 'flex', 
         flexDirection: 'column',
-        position: 'relative' 
+        position: 'relative',
+        overflow: 'hidden' 
       }}
     >
+      {/* Fullscreen Blurred Background */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundImage: 'url(/win11.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'blur(12px)', 
+          zIndex: 0,
+          opacity: 0.7,
+          backgroundColor: '#f0f0f0'
+        }}
+      />
+
       {/* Windows 11 Style Taskbar */}
       <Box 
         sx={{ 
@@ -73,7 +94,9 @@ function UserLostItemReport() {
           display: 'flex', 
           alignItems: 'center', 
           px: 2, 
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)' 
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          position: 'relative',
+          zIndex: 1 
         }}
       >
         <img 
@@ -95,27 +118,15 @@ function UserLostItemReport() {
         </IconButton>
       </Box>
 
-      <Container maxWidth="lg" sx={{ mt: 4, flexGrow: 1, position: 'relative' }}>
-        {/* Blurred Background Image */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            width: '100%',
-            height: '100%',
-            backgroundImage: 'url(/win11.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'blur(8px)',
-            zIndex: 0,
-            opacity: 0.5,
-            backgroundColor: '#f0f0f0'
-          }}
-        />
-
+      <Container 
+        maxWidth="lg" 
+        sx={{ 
+          mt: 4, 
+          flexGrow: 1, 
+          position: 'relative', 
+          zIndex: 1 
+        }}
+      >
         <Grid 
           container 
           spacing={4} 
@@ -144,7 +155,7 @@ function UserLostItemReport() {
                   fontWeight: 'bold' 
                 }}
               >
-                LostIT: Reconnecting People with Lost Items
+                LostIT: Reconnecting Students with Lost Items
               </Typography>
               
               <Typography variant="body1" paragraph>
@@ -159,7 +170,11 @@ function UserLostItemReport() {
               
               <Typography variant="body2">
                 1. Report a lost or found item with detailed information
+              </Typography>
+              <Typography variant="body2">
                 2. Our system matches and notifies potential owners
+              </Typography>
+              <Typography variant="body2">
                 3. Safely connect and recover your lost belongings
               </Typography>
             </Paper>
@@ -265,7 +280,9 @@ function UserLostItemReport() {
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
-          boxShadow: '0 -1px 3px rgba(0,0,0,0.1)' 
+          boxShadow: '0 -1px 3px rgba(0,0,0,0.1)',
+          position: 'relative',
+          zIndex: 1 
         }}
       >
         <Typography variant="body2" color="textSecondary">
