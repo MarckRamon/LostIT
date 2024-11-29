@@ -57,6 +57,7 @@ function Layout({ children }) {
   const menuItems = [
     { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/' },
     { text: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
+    { text: 'Item Report', icon: <InventoryIcon />, path: '/item-report' },
     { text: 'Claim Logs', icon: <FactCheckIcon />, path: '/claim-log' },
   ];
 

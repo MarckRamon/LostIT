@@ -10,6 +10,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ClaimLog from './pages/ClaimLog';
+import ItemReport from './pages/ItemReport';
 
 const theme = createTheme({
   palette: {
@@ -80,6 +81,13 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <EditProfile/>
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/item-report" element={
+              <ProtectedRoute>
+                <Layout>
+                  <ItemReport />
                 </Layout>
               </ProtectedRoute>
             } />
