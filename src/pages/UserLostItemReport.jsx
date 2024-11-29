@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -17,39 +17,84 @@ import { useNavigate } from 'react-router-dom';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LostITLogo from '/LostITbg.png';
 import { IconButton } from '@mui/material';
-
-const categories = [
-  'Electronics', 
-  'Clothing', 
-  'Accessories', 
-  'Books', 
-  'Tools'
-];
+import axiosInstance from '../axiosInstance';
 
 function UserLostItemReport() {
   const [itemName, setItemName] = useState('');
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    fetchCategories();
+    fetchLocations();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axiosInstance.get('/api/categories/getAllCategories');
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setError("Failed to fetch categories.");
+    }
+  };
+
+  const fetchLocations = async () => {
+    try {
+      const response = await axiosInstance.get('/api/locations/getAllLocations');
+      setLocations(response.data);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+      setError("Failed to fetch locations.");
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const reportData = {
-      itemName,
-      category,
-      location,
-      description
-    };
+    if (!itemName || !category || !location) {
+      setError("Please fill in all required fields.");
+      return;
+    }
 
-    console.log('Lost Item Report Submitted:', reportData);
-    
-    // Reset form fields after submission
-    setItemName('');
-    setCategory('');
-    setLocation('');
-    setDescription('');
+    setLoading(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const reportData = {
+        itemName: itemName.trim(),
+        description: description.trim(),
+        status: 'Reported',
+        date: date || new Date().toISOString().split('T')[0],
+        category: { categoryId: parseInt(category) },
+        location: { locationId: parseInt(location) }
+      };
+
+      await axiosInstance.post('/api/items/addReportedItem', reportData);
+      
+      setSuccessMessage('Lost item reported successfully!');
+      
+      // Reset form fields after submission
+      setItemName('');
+      setCategory('');
+      setLocation('');
+      setDescription('');
+      setDate('');
+    } catch (error) {
+      console.error('Error reporting lost item:', error);
+      setError(error.response?.data?.message || "Error reporting item. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUserIconClick = () => {
@@ -198,6 +243,18 @@ function UserLostItemReport() {
                 backdropFilter: 'blur(10px)',
               }}
             >
+              {error && (
+                <Box sx={{ mb: 2, p: 2, bgcolor: 'error.light', color: 'error.contrastText', borderRadius: 1 }}>
+                  {error}
+                </Box>
+              )}
+
+              {successMessage && (
+                <Box sx={{ mb: 2, p: 2, bgcolor: 'success.light', color: 'success.contrastText', borderRadius: 1 }}>
+                  {successMessage}
+                </Box>
+              )}
+
               <Typography 
                 variant="h5" 
                 sx={{ 
@@ -229,22 +286,34 @@ function UserLostItemReport() {
                     required
                   >
                     {categories.map((cat) => (
-                      <MenuItem key={cat} value={cat}>
-                        {cat}
+                      <MenuItem 
+                        key={cat.id || cat.categoryId} 
+                        value={cat.id || cat.categoryId}
+                      >
+                        {cat.name || cat.categoryName}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
                 
-                <TextField
-                  fullWidth
-                  label="Location Found"
-                  variant="outlined"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  required
-                  sx={{ mb: 2 }}
-                />
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <InputLabel>Location</InputLabel>
+                  <Select
+                    value={location}
+                    label="Location"
+                    onChange={(e) => setLocation(e.target.value)}
+                    required
+                  >
+                    {locations.map((loc) => (
+                      <MenuItem 
+                        key={loc.id || loc.locationId} 
+                        value={loc.id || loc.locationId}
+                      >
+                        {loc.name || `${loc.locationBuilding} - ${loc.locationFloor}` || loc.locationName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 
                 <TextField
                   fullWidth
@@ -255,13 +324,24 @@ function UserLostItemReport() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   sx={{ mb: 2 }}
-                  placeholder="Provide additional details about the found item..."
+                  placeholder="Provide additional details about the lost item..."
+                />
+                
+                <TextField
+                  fullWidth
+                  label="Date Found"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ mb: 2 }}
                 />
                 
                 <Button
                   type="submit"
                   variant="contained"
                   fullWidth
+                  disabled={loading}
                   sx={{ 
                     mt: 2,
                     py: 1.5,
@@ -271,7 +351,7 @@ function UserLostItemReport() {
                     }
                   }}
                 >
-                  Submit Lost Item Report
+                  {loading ? 'Submitting...' : 'Submit Lost Item Report'}
                 </Button>
               </form>
             </Paper>

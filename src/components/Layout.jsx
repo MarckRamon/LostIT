@@ -85,6 +85,7 @@ function Layout({ children }) {
     { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
     { text: 'Claim Logs', icon: <FactCheckIcon />, path: '/claim-log' },
+    { text: 'Reported Items', icon: <FactCheckIcon />, path: '/item-report' },
   ];
 
   const drawer = (

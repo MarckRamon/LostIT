@@ -308,17 +308,17 @@ function Inventory() {
     const matchesSearchTerm =
       item.itemName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchTerm.toLowerCase());
-
+  
     const matchesCategory = selectedCategory === null || selectedCategory === ''
       ? true
       : Number(item.categoryId) === Number(selectedCategory);
-
+  
     const matchesLocation = selectedLocation === null || selectedLocation === ''
       ? true
       : Number(item.locationId) === Number(selectedLocation);
 
-    const matchesStatus = selectedStatus ? item.status === selectedStatus : true;
-
+    const matchesStatus = item.status === 'Unclaimed' ? 'Claimed' : 'Unclaimed';
+  
     return matchesSearchTerm && matchesCategory && matchesLocation && matchesStatus;
   });
 
@@ -452,12 +452,11 @@ function Inventory() {
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             label="Status"
+            disabled
           >
             <MenuItem value="">
-              <em>All</em>
+              <em>Unclaimed</em>
             </MenuItem>
-            <MenuItem value="Unclaimed">Unclaimed</MenuItem>
-            <MenuItem value="Claimed">Claimed</MenuItem>
           </Select>
         </FormControl>
         <Button
