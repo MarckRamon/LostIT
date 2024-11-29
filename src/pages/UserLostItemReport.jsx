@@ -76,10 +76,9 @@ function UserLostItemReport() {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundImage: 'url(/win11.jpg)',
+          backgroundImage: 'url(/cat.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'blur(12px)', 
           zIndex: 0,
           opacity: 0.7,
           backgroundColor: '#f0f0f0'
@@ -188,7 +187,7 @@ function UserLostItemReport() {
                 p: 4, 
                 borderRadius: 2, 
                 backgroundColor: 'rgba(255,255,255,0.9)',
-                backdropFilter: 'blur(10px)'
+                backdropFilter: 'blur(10px)',
               }}
             >
               <Typography 
