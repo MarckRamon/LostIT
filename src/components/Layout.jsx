@@ -16,7 +16,7 @@ import {
   ThemeProvider,
   createTheme,
   CssBaseline,
-  Avatar, // Added Avatar import
+  Avatar,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -27,7 +27,7 @@ import {
   Logout as LogoutIcon,
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon,
-  FactCheck as FactCheckIcon, // Added FactCheckIcon import
+  FactCheck as FactCheckIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -123,7 +123,33 @@ function Layout({ children }) {
       </Toolbar>
       <Divider sx={{ opacity: 0.1 }} />
       <List sx={{ px: 2, py: 1, flexGrow: 1 }}>
-        {/* Profile and Logout items */}
+        {/* Menu Items */}
+        {menuItems.map((item) => (
+          <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
+            <ListItemButton
+              onClick={() => navigate(item.path)}
+              sx={{
+                borderRadius: 2,
+                bgcolor: location.pathname === item.path ? 'action.selected' : 'transparent',
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                },
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 40, color: 'primary.main' }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.text}
+                primaryTypographyProps={{
+                  fontSize: '0.9rem',
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+
+        {/* Profile Item */}
         <ListItem disablePadding sx={{ mb: 1 }}>
           <ListItemButton
             onClick={() => navigate('/edit-profile')}
@@ -167,6 +193,8 @@ function Layout({ children }) {
             />
           </ListItemButton>
         </ListItem>
+
+        {/* Logout Item */}
         <ListItem disablePadding>
           <ListItemButton
             onClick={handleLogout}
@@ -193,6 +221,7 @@ function Layout({ children }) {
     </>
   );
 
+  // Rest of the component remains the same as in the previous version
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
