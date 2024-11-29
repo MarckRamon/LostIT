@@ -65,7 +65,9 @@ function UserLostItemReport() {
         display: 'flex', 
         flexDirection: 'column',
         position: 'relative',
-        overflow: 'hidden' 
+        overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center' 
       }}
     >
       {/* Fullscreen Blurred Background */}
@@ -90,11 +92,13 @@ function UserLostItemReport() {
         sx={{ 
           backgroundColor: 'white', 
           height: '48px', 
+          width: '100%',
           display: 'flex', 
           alignItems: 'center', 
           px: 2, 
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          position: 'relative',
+          position: 'absolute',
+          top: 0,
           zIndex: 1 
         }}
       >
@@ -120,8 +124,10 @@ function UserLostItemReport() {
       <Container 
         maxWidth="lg" 
         sx={{ 
-          mt: 4, 
-          flexGrow: 1, 
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: 'calc(100vh - 96px)', // Subtract taskbar and footer heights
           position: 'relative', 
           zIndex: 1 
         }}
@@ -130,6 +136,8 @@ function UserLostItemReport() {
           container 
           spacing={4} 
           sx={{ 
+            width: '100%',
+            maxWidth: '1200px',
             position: 'relative', 
             zIndex: 1 
           }}
@@ -274,17 +282,18 @@ function UserLostItemReport() {
       {/* Windows 11 Style Footer */}
       <Box 
         sx={{ 
-          backgroundColor: 'white', 
+          backgroundColor: 'transparent', 
           height: '48px', 
+          width: '100%',
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
-          boxShadow: '0 -1px 3px rgba(0,0,0,0.1)',
-          position: 'relative',
+          position: 'absolute',
+          bottom: 0,
           zIndex: 1 
         }}
       >
-        <Typography variant="body2" color="textSecondary">
+        <Typography variant="body2" color="black" fontStyle="bold" fontSize={18}>
           © 2024 LostIT. All rights reserved.
         </Typography>
       </Box>
