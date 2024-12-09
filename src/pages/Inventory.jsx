@@ -316,8 +316,10 @@ function Inventory() {
     const matchesLocation = selectedLocation === null || selectedLocation === ''
       ? true
       : Number(item.locationId) === Number(selectedLocation);
-
-    const matchesStatus = item.status === 'Unclaimed' ? 'Claimed' : 'Unclaimed';
+  
+    const matchesStatus = selectedStatus === '' 
+      ? ['Claimed', 'Unclaimed'].includes(item.status)
+      : item.status === selectedStatus;
   
     return matchesSearchTerm && matchesCategory && matchesLocation && matchesStatus;
   });
@@ -452,11 +454,12 @@ function Inventory() {
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             label="Status"
-            disabled
           >
             <MenuItem value="">
-              <em>Unclaimed</em>
+              <em>All</em>
             </MenuItem>
+            <MenuItem value="Unclaimed">Unclaimed</MenuItem>
+            <MenuItem value="Claimed">Claimed</MenuItem>
           </Select>
         </FormControl>
         <Button
@@ -641,7 +644,7 @@ function Inventory() {
             </Box>
           </FormControl>
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
+          <FormControl sx={{ minWidth: 120, mx: 1 }}>
             <InputLabel>Status</InputLabel>
             <Select
               value={formData.status}

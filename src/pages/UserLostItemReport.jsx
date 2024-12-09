@@ -324,7 +324,7 @@ function UserLostItemReport() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   sx={{ mb: 2 }}
-                  placeholder="Provide additional details about the lost item..."
+                  placeholder="Provide additional details about the lost item, where it's found or what it is about."
                 />
                 
                 <TextField

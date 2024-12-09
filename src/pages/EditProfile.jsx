@@ -11,11 +11,13 @@ import {
   useTheme,
 } from '@mui/material';
 import { Edit as EditIcon, Save as SaveIcon, Delete as DeleteIcon, PhotoCamera } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 function EditProfile() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { user, updateUser } = useAuth();
   const [userInfo, setUserInfo] = useState({
     email: '',
@@ -265,6 +267,29 @@ function EditProfile() {
             sx={{ px: 4 }}
           >
             Save Changes
+          </Button>
+        </Box>
+      </Card>
+
+      {/* New Navigation Box */}
+      <Card sx={{ 
+        mt: 3, 
+        p: 3, 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        boxShadow: 2 
+      }}>
+        <Typography variant="h6" sx={{ flexGrow: 1, mr: 2 }}>
+          Need to add a new admin?
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => navigate('/register')}
+          >
+            Register New Admin
           </Button>
         </Box>
       </Card>

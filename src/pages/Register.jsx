@@ -70,7 +70,7 @@ const Register = () => {
         phoneNumber: formData.phoneNumber,
       });
 
-      navigate('/login');
+      navigate('/edit-profile');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     }
@@ -353,20 +353,6 @@ const Register = () => {
                   </Button>
                 )}
               </Stack>
-
-              <Button
-                component={RouterLink}
-                to="/login"
-                sx={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  textDecoration: 'none',
-                  '&:hover': {
-                    color: 'white',
-                  },
-                }}
-              >
-                Already have an account? Sign in
-              </Button>
             </Stack>
           </form>
         </Stack>

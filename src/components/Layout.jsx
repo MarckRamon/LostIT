@@ -28,6 +28,7 @@ import {
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon,
   FactCheck as FactCheckIcon,
+  Report as ReportIcon
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -85,7 +86,7 @@ function Layout({ children }) {
     { text: 'Dashboard Analytics', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
     { text: 'Claim Logs', icon: <FactCheckIcon />, path: '/claim-log' },
-    { text: 'Reported Items', icon: <FactCheckIcon />, path: '/item-report' },
+    { text: 'Reported Items', icon: <ReportIcon />, path: '/item-report' },
   ];
 
   const drawer = (

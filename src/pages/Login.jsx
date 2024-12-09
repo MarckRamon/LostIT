@@ -321,19 +321,6 @@ const Login = () => {
             >
               <Button
                 component={RouterLink}
-                to="/register"
-                sx={{
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  textDecoration: 'none',
-                  '&:hover': {
-                    color: 'white',
-                  },
-                }}
-              >
-                Sign up
-              </Button>
-              <Button
-                component={RouterLink}
                 to="/forgot-password"
                 sx={{
                   color: 'rgba(255, 255, 255, 0.7)',

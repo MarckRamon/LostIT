@@ -31,7 +31,6 @@ function ItemReport() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('Reported');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
@@ -143,22 +142,22 @@ function ItemReport() {
 
     const matchesCategory = selectedCategory === '' 
       ? true 
-      : Number(item.categoryId) === Number(selectedCategory);
+      : item.category?.id === Number(selectedCategory) || 
+        item.category?.categoryId === Number(selectedCategory);
 
     const matchesLocation = selectedLocation === '' 
       ? true 
-      : Number(item.locationId) === Number(selectedLocation);
+      : item.location?.id === Number(selectedLocation) || 
+        item.location?.locationId === Number(selectedLocation);
 
-    const matchesStatus = selectedStatus 
-      ? item.status === selectedStatus 
-      : true;
+    const isReportedStatus = item.status === 'Reported';
 
-    return matchesSearchTerm && matchesCategory && matchesLocation && matchesStatus;
+    return matchesSearchTerm && matchesCategory && matchesLocation && isReportedStatus;
   });
 
   const generateReportSummary = () => {
     const totalItems = filteredItems.length;
-    const reportedItems = filteredItems.filter(item => item.status === 'Reported').length;
+    const reportedItems = filteredItems.length;
 
     return (
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
@@ -206,7 +205,7 @@ function ItemReport() {
             label="Category"
           >
             <MenuItem value="">
-              <em>All</em>
+              <em>All Categories</em>
             </MenuItem>
             {categories.map((category) => (
               <MenuItem
@@ -227,7 +226,7 @@ function ItemReport() {
             label="Location"
           >
             <MenuItem value="">
-              <em>All</em>
+              <em>All Locations</em>
             </MenuItem>
             {locations.map((location) => (
               <MenuItem
@@ -237,16 +236,6 @@ function ItemReport() {
                 {location.name || `${location.locationBuilding} - ${location.locationFloor}` || location.locationName}
               </MenuItem>
             ))}
-          </Select>
-        </FormControl>
-        <FormControl sx={{ minWidth: 120, mx: 1 }}>
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            label="Status"
-          >
-            <MenuItem value="Reported">Reported</MenuItem>
           </Select>
         </FormControl>
       </Box>

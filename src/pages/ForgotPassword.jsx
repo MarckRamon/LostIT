@@ -63,7 +63,6 @@ function ForgotPassword() {
           <button type="submit" className="login-button">Retrieve Password</button>
           <div className="links">
             <Link to="/login">Back to Login</Link>
-            <Link to="/register">Register</Link>
           </div>
         </form>
       </div>

@@ -55,7 +55,6 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/users" element={<UserLostItemReport />} />
             <Route
@@ -94,6 +93,13 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <ItemReport/>
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/register" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Register/>
                 </Layout>
               </ProtectedRoute>
             } />
