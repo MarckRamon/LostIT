@@ -48,8 +48,7 @@ function Dashboard() {
     totalItems: 0,
     unclaimed: 3,
     stockValue: 0,
-    unfulfilled: 0,
-    received: 0,
+    
   });
   const [categoryData, setCategoryData] = useState([
     { name: 'Electronics', count: 0, icon: ElectronicsIcon },
@@ -93,9 +92,6 @@ function Dashboard() {
         claimed,
         totalItems,
         unclaimed,
-        stockValue,
-        unfulfilled: 4,
-        received: 1,
       });
   
       const categoryCounts = {
@@ -211,14 +207,6 @@ function Dashboard() {
               <Typography variant="h5" sx={{ mb: 4 }}>
                 {loading ? 'Loading...' : (recentItem && recentItem.category ? recentItem.category.categoryName : 'No category')}
               </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Unfulfilled</Typography>
-                <Typography>{stats.unfulfilled}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography>Received</Typography>
-                <Typography>{stats.received}</Typography>
-              </Box>
             </CardContent>
           </Card>
         </Grid>

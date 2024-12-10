@@ -478,9 +478,9 @@ function Inventory() {
             <TableRow>
               <TableCell>Item ID</TableCell>
               <TableCell>Item Name</TableCell>
+              <TableCell>Description</TableCell>
               <TableCell>Category</TableCell>
               <TableCell>Location</TableCell>
-              <TableCell>Description</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Date Added</TableCell>
               <TableCell>Actions</TableCell>
@@ -498,9 +498,9 @@ function Inventory() {
                 <TableRow key={item.itemId}>
                   <TableCell>{item.itemId}</TableCell>
                   <TableCell>{item.itemName || 'N/A'}</TableCell>
+                  <TableCell>{item.description || 'N/A'}</TableCell>
                   <TableCell>{getCategoryName(item)}</TableCell>
                   <TableCell>{getLocationName(item)}</TableCell>
-                  <TableCell>{item.description || 'N/A'}</TableCell>
                   <TableCell>{item.status || 'N/A'}</TableCell>
                   <TableCell>{item.date || 'N/A'}</TableCell>
                   <TableCell>
